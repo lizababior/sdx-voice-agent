@@ -2,18 +2,6 @@
 
 Starter for the SDxSDSU Voice Agent Hackathon (ElevenLabs + Daytona). The voice loop works from end to end. Use the build time for the idea.
 
-**Schedule:** kickoff at 12:00 (the organizers give the prompt in the room). Demos start at 4:30. Winners before 6:00.
-
-## Before kickoff
-
-Each team member does these steps:
-
-- [ ] Send your GitHub username to the team lead.
-- [ ] Redeem the ElevenLabs credits. The instructions are in your RSVP email.
-- [ ] Redeem the Daytona credits. The instructions are in the same email.
-- [ ] Do the steps in [Setup](#setup).
-- [ ] Make sure that `npm run smoke` shows `PASS` on all lines.
-
 ## Setup
 
 1. Clone the repo and install the packages:
