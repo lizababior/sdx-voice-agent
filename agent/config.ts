@@ -6,8 +6,11 @@ import workOrder from "../data/work-order.json" with { type: "json" };
 
 export const AGENT_NAME = "VacMan";
 
-// Selected by ticket 05 (LLM test). Candidates: claude-haiku-5-5, gemini-3.5-flash.
-export const LLM: ElevenLabs.Llm = "claude-haiku-5-5";
+// Selected by test (Nov 8): haiku passed 18/18 agent tests with 0.74 s to first sentence;
+// gemini-3.5-flash passed 15/18. Haiku is slower to generate a tool call (2.4 s), so the
+// prompt says "Running the numbers" first.
+// VACMAN_LLM overrides it for a comparison run (ticket 05).
+export const LLM = (process.env.VACMAN_LLM ?? "claude-haiku-5-5") as ElevenLabs.Llm;
 
 // One multilingual voice for English and Spanish.
 export const VOICE_ID = "cjVigY5qzO86Huf0OWal";

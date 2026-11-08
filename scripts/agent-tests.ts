@@ -84,6 +84,24 @@ for (const run of invocation.testRuns) {
   if (!ok && rationale) console.log(`        judge ${JSON.stringify(rationale)}`);
 }
 
+// Latency: mean of each turn metric (seconds) over all agent turns.
+const sums: Record<string, { total: number; n: number }> = {};
+for (const run of invocation.testRuns) {
+  for (const turn of run.agentResponses ?? []) {
+    for (const [key, rec] of Object.entries(turn.conversationTurnMetrics?.metrics ?? {})) {
+      sums[key] ??= { total: 0, n: 0 };
+      sums[key].total += rec.elapsedTime;
+      sums[key].n++;
+    }
+  }
+}
+if (Object.keys(sums).length) {
+  console.log(`\n${line}\n Turn metrics (mean over agent turns)\n${line}`);
+  for (const [key, v] of Object.entries(sums).sort()) {
+    console.log(` ${key.padEnd(48)} ${(v.total / v.n).toFixed(3)} s  (n=${v.n})`);
+  }
+}
+
 // pass@k table.
 console.log(`\n${line}\n ${"test".padEnd(36)} ${"passed".padEnd(10)} pass@${k}\n${line}`);
 let failed = false;

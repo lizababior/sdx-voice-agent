@@ -79,6 +79,40 @@ The Johnson job: a Carrier 24ANA (Infinity, two-stage) 3-ton condenser, R-410A, 
 
 The two judge curveballs are the same for every team: a change of mind mid-task, and an off-topic question. Steps 5 and 6 rehearse them.
 
+### Loom script
+
+The person who plays Maria reads these lines. Speak naturally, at a normal pace. Wait for VacMan to finish each reply. The Loom has no off-topic step; rehearse it for the finals.
+
+| Time | Maria says | VacMan does (check it) |
+| --- | --- | --- |
+| 0:00 | Opening line, before the tap: "Maria is an HVAC tech with gloves on. Done means an invoice ready before she leaves the driveway." | — |
+| 0:06 | *Taps Start.* | "Hey, it's VacMan, you're at Linda Johnson's with the Carrier 3-ton condenser. What are you seeing?" |
+| 0:12 | "The outdoor board is flashing three short, two long." | Code 32, low-pressure switch trip. Check indoor airflow first, then the charge. Logs the diagnostic fee and the finding. |
+| 0:25 | "Airflow's good, filter's clean. Suction is 105, suction line is 60." | "Running the numbers." Superheat about 26, target 8 to 12, most likely low charge, check for leaks. A result chip appears. |
+| 0:50 | "Encontré la fuga en el Schrader de succión, cambié el core y agregué dos libras." | Answers in Spanish. English notes appear: leak, leak search, Schrader core, 2 lb R-410A. |
+| 1:10 | "Also swapped the dual run capacitor." | "Got it, logged." The capacitor note appears. |
+| 1:18 | "Actually no, scratch that, it tested fine." | The capacitor note disappears. "Removed." |
+| 1:28 | "Okay, wrap up the job." | Read-back: diagnostic fee, leak search, Schrader core, 2 lb R-410A, $707.92 with tax. "Send it?" |
+| 1:42 | "Yes, send it." | The invoice PDF appears, $707.92, "Sent to office for review". |
+| 1:55 | Stop the recording on the invoice. | — |
+
+Say the capacitor line and the correction as **two separate turns**. In one turn, VacMan skips the capacitor, and the correction is not visible.
+
+### Finals curveball rehearsal
+
+Rehearse these in the demo loop. Judges use their own words.
+
+- **Off-topic:** "Who wins the Padres game tonight?" VacMan answers in one line, then returns to the job.
+- **Change of mind during the read-back:** "Wait, take the leak search off." VacMan removes the note and does the read-back again ($439.62: $408.00 + $31.62 tax).
+- **Change of mind mid-task:** "Actually, check the liquid line instead: 290 psi, 91 degrees." VacMan calculates the subcooling: about 3°F, which is low and confirms the low charge.
+
+### Recording checklist
+
+- Quiet room. Laptop microphone or a headset.
+- Phone view only, about 400 px wide.
+- Wait until the sandbox status is "warm" before you tap Start.
+- Record 3 or more takes. Keep the best take under 2:00.
+
 ---
 
 ## 4. User stories
@@ -245,7 +279,7 @@ The phone page passes these from the work order when it starts the session: `job
 - [ ] **Knowledge base.** Write `troubleshooting-sop.md`, `price-book.md` and `shop-policies.md`. Find the real, public Carrier fault-code sheet and save it as `carrier-fault-codes.md`. `npm run agent:setup` uploads all 4 and attaches them to the agent.
 - [ ] **Agent config** in `agent/config.ts`: LLM, one multilingual voice, language detection with an `es` preset, the dynamic variables, the first message, the 3 tools and the knowledge base. `npm run agent:setup` pushes all of it.
 - [ ] **System prompt** with the rules in section 7.
-- [ ] **LLM test.** Compare `claude-haiku-5-5` and `gemini-3.5-flash` on turn latency and tool calls. Keep the winner in `agent/config.ts`.
+- [x] **LLM test.** `claude-haiku-5-5` won (section 9).
 - [ ] **Demo script** for Maria (section 3) and the **Loom**.
 
 ### Deandre: Daytona back office
@@ -311,7 +345,7 @@ Shop header (Coastal Comfort HVAC), invoice number, customer name and address, e
 
 ### Demo loop (3:15–3:40)
 
-Run section 3 from end to end at least 5 times. Watch the console latency badges. If they are red, try the other LLM.
+Run section 3 from end to end at least 5 times. Watch the console latency badges. If they are red, first change the knowledge base usage mode to `auto`, then try `gemini-3.5-flash`.
 
 ### Loom (3:50)
 
@@ -368,7 +402,7 @@ Read the reason before you change a decision.
 | The Loom opens with the user and the finish line | Judges watch about 13 Looms and need the frame in 5 seconds. |
 | A tool failure is said plainly, with one retry | The rubric says "no faked steps". An honest recovery scores better than a freeze. |
 | Client tools, Next.js only, localhost | No ngrok URL that changes, no second server, no public code-execution route. |
-| LLM chosen by a test | "Works live" (×2) depends on latency. Ten minutes of testing beats a guess. |
+| LLM: `claude-haiku-5-5`, chosen by a test | Full agent test suite at k=2: haiku 18/18, 0.74 s to first spoken sentence; `gemini-3.5-flash` 15/18 (missed the fault code), 0.85 s. Response time after the user message is about 1.15 s for both. Haiku needs 2.4 s to generate a tool call, so VacMan says "Running the numbers" first. |
 | The pre-kickoff scaffold stays in this repo | The scaffold is generic setup only. An organizer must confirm at 12:30 that it is allowed. |
 | Name: VacMan | A vacuum pump is on every HVAC job. The name is short and easy to remember. |
 
@@ -381,4 +415,3 @@ Email, SMS or any other real message. Payments. More than one work order or a wo
 ## 11. Open facts
 
 - The organizer's answer on the pre-kickoff scaffold.
-- The result of the LLM test.
