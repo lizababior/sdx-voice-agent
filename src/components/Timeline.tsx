@@ -26,9 +26,15 @@ export function Timeline({ feed, transcript }: { feed: FeedItem[]; transcript: T
   return (
     <div ref={ref} onScroll={onScroll} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
       {feed.length === 0 ? (
-        <p className="m-auto max-w-72 text-center text-text-dim">
-          Nothing logged yet. Tap the mic and say what you see.
-        </p>
+        <div className="m-auto flex max-w-72 flex-col items-center gap-3 text-center">
+          <span aria-hidden className="flex size-14 items-center justify-center rounded-full bg-surface text-text-dim">
+            <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M9 5h10M9 12h10M9 19h10M5 5h.01M5 12h.01M5 19h.01" />
+            </svg>
+          </span>
+          <p className="font-semibold">No notes yet</p>
+          <p className="-mt-2 text-[0.9375rem] text-text-dim">Tap the mic and say what you see. Notes show up here.</p>
+        </div>
       ) : (
         feed.map((item) =>
           item.kind === "chip" ? (
