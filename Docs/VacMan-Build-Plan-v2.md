@@ -75,6 +75,8 @@ The Johnson job: a Carrier 24ANA (Infinity, two-stage) 3-ton condenser, R-410A, 
 6. A judge asks something off-topic. VacMan answers in one line and returns to the job.
 7. Maria: "Wrap up the job." VacMan reads back the line items and the total. Maria says yes. The invoice PDF appears, marked "Sent to office for review".
 
+**Expected invoice:** diagnostic fee (DIAG-STD) $129.00, leak search (LEAK-SRCH) $249.00, Schrader core (SCHR-CORE) $89.00, R-410A (R410A-LB) 2 × $95.00. Subtotal $657.00, tax 7.75% $50.92, total **$707.92**.
+
 The two judge curveballs are the same for every team: a change of mind mid-task, and an off-topic question. Steps 5 and 6 rehearse them.
 
 ---
@@ -204,7 +206,7 @@ Agree on this first. Then each person builds alone until the merge at 3:15. To c
 
 | Tool | Parameters | What the handler does |
 | --- | --- | --- |
-| `log_job_note` | `action` (`add` or `remove`), `text` (English), `category`, `item_code?`, `quantity?`, `note_id?` | Adds or removes a job note in the page state. Returns the note ID and the full list of notes. |
+| `log_job_note` | `action` (`add` or `remove`), `text` (English), `category`, `item_code?`, `quantity?`, `note_id?` | Adds or removes a job note in the page state. `add` returns `{saved: true, note_id}`. `remove` returns `{removed: true}`. Return only these fields: the agent tracks its notes from the conversation. As a backstop, refuse a second `DIAG-STD` with `{saved: false, reason: "already logged"}`. |
 | `run_python` | `code` | Calls `/api/sandbox/run`. Returns stdout, or the error text. |
 | `create_invoice` | — | Calls `/api/sandbox/invoice` with the work order and the notes. Returns the invoice number and the total. |
 
@@ -276,9 +278,11 @@ These rules go into the system prompt. This section is the single source for age
 - Speak in one or two short, plain sentences, as in a phone call.
 - Answer in the technician's language. Write all job notes and all invoice text in English.
 - Use the knowledge base for fault codes, procedures, prices and policies. When the knowledge base does not have the answer, say so.
-- Use `run_python` for all math. Use `hvac.saturation_temp(refrigerant, psig)`. Say "running the numbers" first. Say the result and what it means.
-- Log a job note for each finding, measurement, repair and part. Use price book item codes and quantities.
-- To correct a note, remove it by its ID.
+- Use `run_python` for all math. Use `hvac.saturation_temp(refrigerant, psig)`. Say "running the numbers" first. Say the result and the target, then the most likely cause first, then the check that confirms it.
+- Log a job note for each finding, measurement, repair and part. Use price book item codes and quantities. Each note is a short phrase of up to 12 words.
+- Log the diagnostic fee (DIAG-STD) as its own note, once per job. When a leak is found, log the leak search (LEAK-SRCH) once.
+- Log each item once: check the notes already logged in the conversation first.
+- To correct a note, remove it with the `note_id` from its add result.
 - On "wrap up", do the read-back in one or two sentences. Call `create_invoice` only after a yes.
 - Answer an off-topic question in one line, then return to the job.
 - When a tool fails, say so, try once more, then continue. Never invent a result.
@@ -300,9 +304,10 @@ Shop header (Coastal Comfort HVAC), invoice number, customer name and address, e
   3. Remove the capacitor note.
   4. Run superheat code for 105 psig, 60°F and R-410A.
   5. Create the invoice.
-- It prints `PASS` or `FAIL` for each check: no capacitor on the invoice, superheat 26°F ±2, correct line items and total, PDF not empty, the same sandbox for all calls.
+- It prints `PASS` or `FAIL` for each check: no capacitor on the invoice, superheat 26°F ±2, the expected invoice from section 3 (total $707.92), PDF not empty, the same sandbox for all calls.
 - **Prior art:** `npm run smoke` uses the same style.
-- **The voice and LLM layer has no automated test.** The demo loop checks it.
+- **Agent behavior:** `npm run agent:test` runs ElevenLabs simulation tests (greeting, fault code, price, policy, superheat, Spanish notes, correction, wrap-up, off-topic) with mocked tools. An LLM judge scores each success condition. Use `--k 3` for pass@k. Tests live in `agent/tests.ts`.
+- **Voice layer (latency, interruptions):** the demo loop checks it.
 
 ### Demo loop (3:15–3:40)
 
@@ -343,6 +348,9 @@ Read the reason before you change a decision.
 | A saturation helper in the sandbox | The agent writes shorter code, so it makes fewer errors. |
 | Live job notes through `log_job_note` | Judges watch the notes appear. A correction visibly removes a line. The invoice uses structured notes, not free text. |
 | Correction by note ID, not "undo last" | The technician can correct any note, not only the last one. |
+| `log_job_note` returns only `{saved, note_id}`, not the full list | With the full list, the agent compared it with its memory and re-logged items when they differed, which caused duplicate charges. The agent tracks its notes from the conversation. |
+| Leak search is billed when a leak is found | A found leak means a leak search was done, and it is billable. It makes the demo invoice the same on every run. |
+| Expressive mode off | The agent writes plain text. Audio tags such as [happy] would show in the phone transcript. |
 | Read-back and a yes before the invoice | A real technician wants to check. It is also a natural point for the "change of mind" curveball. |
 | A preloaded work order as dynamic variables | It saves about 15 seconds of the Loom. Dispatch works this way. The invoice gets the customer data free. |
 | One hardcoded work order, no job list | Only one job is demoed. A job list is UI that scores nothing. |

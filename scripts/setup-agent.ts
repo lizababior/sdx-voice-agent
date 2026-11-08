@@ -75,7 +75,8 @@ const conversationConfig = {
       },
     },
   },
-  tts: { voiceId: VOICE_ID },
+  // expressiveMode off: the agent writes plain text, with no audio tags such as [happy].
+  tts: { voiceId: VOICE_ID, expressiveMode: false },
   languagePresets: Object.fromEntries(
     EXTRA_LANGUAGES.map((language) => [language, { overrides: { agent: { language } } }]),
   ),

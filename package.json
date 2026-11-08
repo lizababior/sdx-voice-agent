@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "check:data": "node scripts/check-data.ts",
     "agent:verify": "node --env-file=.env.local scripts/verify-agent.ts",
-    "agent:test": "node --env-file=.env.local scripts/agent-tests.ts"
+    "agent:test": "node --env-file=.env.local scripts/agent-tests.ts",
+    "replay": "node --env-file=.env.local scripts/replay.ts"
   },
   "dependencies": {
     "@daytonaio/sdk": "^0.230.0",
