@@ -1,6 +1,6 @@
 import { Home } from "@/components/Home";
-import workOrder from "../../data/work-order.json";
+import { JOBS } from "@/lib/jobs";
 
 export default function HomePage() {
-  return <Home workOrder={workOrder} />;
+  return <Home workOrders={JOBS} />;
 }
