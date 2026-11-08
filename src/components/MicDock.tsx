@@ -10,7 +10,7 @@ const CAPTION: Record<MicState, string> = {
 
 function MicIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <svg viewBox="0 0 24 24" className="size-9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
       <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
       <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
     </svg>
@@ -19,7 +19,7 @@ function MicIcon() {
 
 function Bars() {
   return (
-    <span className="flex h-10 items-center gap-1.5" aria-hidden>
+    <span className="flex h-8 items-center gap-1.5" aria-hidden>
       {[0, 150, 300].map((delay) => (
         <span
           key={delay}
@@ -55,15 +55,15 @@ export function MicDock({
   const on = state === "listening" || state === "speaking" || state === "connecting";
   const isError = state === "error";
   return (
-    <div className="pb-safe flex flex-col items-center gap-3 border-t border-line bg-bg px-4 pt-4">
+    <div className="pb-safe flex flex-col items-center gap-3 border-t border-white/10 bg-bg/80 px-4 pt-4 backdrop-blur-xl">
       <button
         type="button"
         onClick={onToggle}
         disabled={startDisabled && !on}
         aria-pressed={on}
         aria-label={on ? "End session" : "Start talking to VacMan"}
-        className={`relative flex size-28 items-center justify-center rounded-full active:scale-95 disabled:opacity-50 ${
-          isError ? "bg-surface-2 text-text-dim" : "bg-accent text-accent-ink"
+        className={`relative flex size-20 items-center justify-center rounded-full active:scale-95 disabled:opacity-50 ${
+          isError ? "bg-surface-2 text-text-dim" : "bg-linear-to-b from-[#ffad5c] to-[#ff6a00] text-accent-ink shadow-[0_8px_32px_rgb(255_110_0/0.45)]"
         }`}
       >
         {state === "listening" && (

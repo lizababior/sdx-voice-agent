@@ -71,7 +71,11 @@ html {
 }
 
 body {
-  background: var(--color-bg);
+  /* Orange glow from the top edge, fading into the dark background. */
+  background:
+    radial-gradient(130% 55% at 50% -12%, rgb(255 138 31 / 0.75) 0%, rgb(255 94 0 / 0.25) 45%, transparent 75%),
+    var(--color-bg);
+  background-repeat: no-repeat;
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
