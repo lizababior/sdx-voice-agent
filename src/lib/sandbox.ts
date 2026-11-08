@@ -8,27 +8,55 @@ const DIR = "vacman"; // folder in the sandbox that holds the helpers and data
 const FILES = ["sandbox/hvac.py", "sandbox/invoice.py", "data/price-book.csv", "data/pt-tables.csv"];
 
 // On globalThis so Next.js hot reloads keep the cache.
-const g = globalThis as unknown as { vmDaytona?: Daytona; vmSandboxes?: Map<string, Sandbox> };
+const g = globalThis as unknown as {
+  vmDaytona?: Daytona;
+  vmSandboxes?: Map<string, Sandbox>;
+  vmStarting?: Promise<{ sandboxId: string; status: "warm" }>;
+};
 const daytona = () => (g.vmDaytona ??= new Daytona()); // reads DAYTONA_API_KEY
 const cache = () => (g.vmSandboxes ??= new Map());
 
 const LABELS = { app: "vacman" };
 
-/** Deletes earlier VacMan sandboxes. Each page load starts one, and the account allows only 10 CPUs. */
-async function deleteOldSandboxes() {
-  const old = [];
-  for await (const s of daytona().list({ labels: LABELS })) old.push(s);
-  await Promise.allSettled(old.map((s) => s.delete()));
-  cache().clear();
+/**
+ * Returns the job's warm sandbox. Every page, tab and reload shares one sandbox: a running VacMan
+ * sandbox is reused, and a new one is created only when none runs. A live sandbox is never deleted,
+ * because a start from another tab used to delete the sandbox of the open job screen.
+ */
+export function startSandbox() {
+  // Starts at the same moment (two tabs) share one request, so they do not create two sandboxes.
+  g.vmStarting ??= startOrReuse().finally(() => {
+    g.vmStarting = undefined;
+  });
+  return g.vmStarting;
 }
 
-/** Creates the job's sandbox: copies the helpers and data in, installs reportlab. */
-export async function startSandbox() {
-  // ponytail: one VacMan sandbox per account at a time. Fine for a one-laptop demo.
-  await deleteOldSandboxes();
+async function startOrReuse() {
+  const all: Sandbox[] = [];
+  for await (const s of daytona().list({ labels: LABELS })) all.push(s);
+  // Clean up sandboxes that are not running. The account allows only 10 CPUs.
+  await Promise.allSettled(all.filter((s) => s.state !== "started").map((s) => s.delete()));
+
+  const running = all
+    .filter((s) => s.state === "started")
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  for (const sandbox of running) {
+    try {
+      // Setup again: it copies the latest helpers and data, and proves that the sandbox answers.
+      await setUp(sandbox);
+      // Older sandboxes had an idle timer. Turn it off, so the sandbox never stops for inactivity.
+      if (sandbox.autoStopInterval !== 0) await sandbox.setAutostopInterval(0);
+      cache().set(sandbox.id, sandbox);
+      return { sandboxId: sandbox.id, status: "warm" as const };
+    } catch {
+      await sandbox.delete().catch(() => {});
+    }
+  }
+
   // Setup takes ~3 s, but once in testing it hung. A hung sandbox is deleted and a fresh one tried once.
   for (let attempt = 1; ; attempt++) {
-    const sandbox = await daytona().create({ language: "python", ephemeral: true, autoStopInterval: 240, labels: LABELS });
+    // autoStopInterval 0: the sandbox never stops for inactivity, so it lasts through the demo and the finals.
+    const sandbox = await daytona().create({ language: "python", ephemeral: true, autoStopInterval: 0, labels: LABELS });
     try {
       await setUp(sandbox);
       cache().set(sandbox.id, sandbox);
