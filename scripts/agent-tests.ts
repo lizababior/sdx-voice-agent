@@ -36,7 +36,16 @@ for (const t of selected) {
     dynamicVariables: TEST_DYNAMIC_VARIABLES,
     toolMockConfig: { mockingStrategy: "all", fallbackStrategy: "raise_error" },
     toolMockOverrides: Object.fromEntries(
-      Object.entries(t.toolMocks ?? {}).map(([name, result]) => [toolIdByName[name], [{ mockResult: result }]]),
+      Object.entries(t.toolMocks ?? {}).map(([name, mock]) => [
+        toolIdByName[name],
+        (typeof mock === "string" ? [{ result: mock }] : mock).map(({ when, result }) => ({
+          mockResult: result,
+          parameterConditions: Object.entries(when ?? {}).map(([path, expectedValue]) => ({
+            path,
+            eval: { type: "exact" as const, expectedValue },
+          })),
+        })),
+      ]),
     ),
   };
   const match = existing.find((e) => e.name === t.name);
