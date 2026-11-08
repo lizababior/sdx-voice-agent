@@ -1,0 +1,38 @@
+[
+  {
+    "job_id": "JOB-1043",
+    "customer_name": "Dan Whitfield",
+    "address": "4310 Collwood Blvd, San Diego, CA 92115",
+    "equipment": "Goodman 3-ton condenser",
+    "model": "Goodman GSX140361",
+    "refrigerant": "R-410A",
+    "metering_device": "TXV",
+    "complaint": "Outdoor unit hums but the fan does not spin. No cooling. Customer called after hours.",
+    "last_visit": "2024-08-03: capacitor tested low but in spec",
+    "technician": "Maria Lopez"
+  },
+  {
+    "job_id": "JOB-1044",
+    "customer_name": "Rosa Delgado",
+    "address": "6125 El Cajon Blvd, San Diego, CA 92115",
+    "equipment": "Rheem 2.5-ton condenser",
+    "model": "Rheem RA1430AJ1NA",
+    "refrigerant": "R-410A",
+    "metering_device": "TXV",
+    "complaint": "Cools poorly. The indoor coil sometimes ices up.",
+    "last_visit": "2025-04-20: maintenance tune-up, filter replaced",
+    "technician": "Maria Lopez"
+  },
+  {
+    "job_id": "JOB-1045",
+    "customer_name": "Earl Simmons",
+    "address": "3901 Fairmount Ave, San Diego, CA 92105",
+    "equipment": "Carrier 3-ton condenser (older unit)",
+    "model": "Carrier 38TKB036300",
+    "refrigerant": "R-22",
+    "metering_device": "fixed orifice",
+    "complaint": "Runs all day and the house stays warm.",
+    "last_visit": "2025-07-30: added 1 lb R-22, customer declined a leak search",
+    "technician": "Maria Lopez"
+  }
+]
