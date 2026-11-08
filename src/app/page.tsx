@@ -1,5 +1,6 @@
-import { JobList } from "@/components/JobList";
+import { VoiceAgent } from "@/components/VoiceAgent";
+import workOrder from "../../data/work-order.json";
 
 export default function Home() {
-  return <JobList />;
+  return <VoiceAgent workOrder={workOrder} />;
 }

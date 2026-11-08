@@ -1,6 +1,6 @@
 # VacMan — Frontend Design
 
-Mobile-first web app for HVAC techs. The tech holds a phone in one hand, often in a hot attic or a dirty crawlspace, often with gloves on. They glance at the screen and talk. The screen has to be readable in 1 second.
+Mobile-first web app for HVAC techs. It follows `Docs/VacMan-Build-Plan-v2.md`: one Next.js app on localhost, one work order, client tools. The tech holds a phone in one hand, often in a hot attic or a dirty crawlspace, often with gloves on. They glance at the screen and talk. The screen has to be readable in 1 second.
 
 Build target: Next.js + Tailwind v4 (`src/app/globals.css`). Design for a 390 px wide phone first. Do not design a desktop layout.
 
@@ -54,18 +54,16 @@ Add these in `globals.css` with `@theme`.
 
 Accent is used rarely. If more than about 10% of the screen is orange, remove some.
 
-### Event type colors
+### Note category colors
 
-Each timeline card has a 4 px left border and a small label in its type color. Never use color alone: always show the word too.
+Each note card has a 4 px left border and a small icon and label in its category color. Never use color alone: always show the word too.
 
-| Type | Color | Label |
-| --- | --- | --- |
-| `part` | `#4DA3FF` blue | Part |
-| `tool` | `#A78BFA` violet | Tool |
-| `labor` | `#34C759` green | Labor |
-| `damage` | `#FF453A` red | Damage |
-| `note` | `#A1A5AD` gray | Note |
-| substitute options | `#FF6600` orange | Substitute |
+| Category | Color | Label | Icon |
+| --- | --- | --- | --- |
+| `finding` | `#4DA3FF` blue | Finding | magnifier |
+| `measurement` | `#A78BFA` violet | Measurement | gauge |
+| `repair` | `#34C759` green | Repair | wrench |
+| `part` | `#F2C14E` amber | Part | box |
 
 ### Type
 
@@ -89,110 +87,100 @@ Each timeline card has a 4 px left border and a small label in its type color. N
 
 ## 4. Screens
 
-### 4.1 Job list — `src/app/page.tsx`
+### 4.1 Phone view — `src/app/page.tsx` (the main screen)
+
+There is one work order, so there is no job list. The page opens straight into the job.
 
 ```
 ┌──────────────────────────┐
-│ Hi, Mike                 │  28 bold
-│ Sat, Nov 8 · 3 jobs      │  dim
-│                          │
-│ TODAY                    │  label
-│ ┌──────────────────────┐ │
-│ │ ● Garcia             │ │  status dot + customer
-│ │ 412 Palm St          │ │
-│ │ 9:30 AM · Carrier 3T │ │
-│ │ Not cooling      ›   │ │
-│ └──────────────────────┘ │
-│ ┌──────────────────────┐ │
-│ │ ...                  │ │
-│ └──────────────────────┘ │
-│                          │
-│ UPCOMING                 │
-│ PAST                     │
-└──────────────────────────┘
-```
-
-- Group by Today, Upcoming, Past. Past cards are dimmer.
-- The whole card is one tap target (minimum height 96 px) and opens the job.
-- Status dot: orange = in progress, green = done, gray = not started.
-- Show the next job first. If a job is in progress, it gets an orange border.
-- No bottom nav, no menu, no search. Six jobs do not need them.
-
-### 4.2 Job session — `src/app/jobs/[id]/page.tsx` (the main screen)
-
-```
-┌──────────────────────────┐
-│ ‹ Jobs                   │  back (56 px target)
-│ Garcia                   │  28 bold
-│ 412 Palm St              │  dim
-│ Carrier 3T · Not cooling │  dim
+│ JOB-1042   ● Sandbox warm│  status, 40 px target
+│ Linda Johnson            │  28 bold
+│ 5520 Montezuma Rd...     │  dim
+│ Carrier 3-ton · R-410A   │  dim
+│ No cooling. Outdoor...   │  dim, 2 lines
 ├──────────────────────────┤
-│ ▌PART                    │
-│ ▌40/5 µF capacitor    ×1 │
+│ ▌ FINDING                │
+│ ▌ Code 32 low-pressure   │
 │ ▌                  2:41p │
-│ ▌LABOR                   │
-│ ▌Replace capacitor    30m│
+│ ▌ MEASUREMENT            │
+│ ( Calc  Superheat 26°F ) │  result chip
 │  ...scrolls...           │
-│                          │
+│  Transcript (6) ▸        │
 ├──────────────────────────┤
 │        ( ◉ )             │  mic, 112 px
 │     Listening…           │
-│  [ Close out job ]       │  secondary
+│  [ Wrap up the job ]     │  secondary
 └──────────────────────────┘
 ```
 
-- **Header** is compact and sticks to the top. It shows customer, address, equipment and complaint, so the tech never has to ask what the job is.
-- **Timeline** takes the middle and scrolls. The newest card is at the bottom, next to the mic, and the list auto-scrolls to it. New cards slide up and fade in (200 ms). The card flashes the surface-2 color once.
-- **Dock** is fixed at the bottom with the mic and one secondary button. It has a solid `--color-bg` background and a top border so cards do not show through.
-- The tech can leave the screen on for a long time. Keep the screen awake with the Wake Lock API while a session is active.
+- **Header** is compact and sticky. It shows the job ID, the sandbox status, the customer, the address, the equipment with refrigerant and metering device, and the complaint (2 lines).
+- **Sandbox status:** "warming" (orange dot), "warm" (green), "failed" (red, tap to retry). The page starts the sandbox when it opens. The mic stays disabled with the caption "Warming up the sandbox…" until the sandbox is warm or has failed.
+- **Feed** takes the middle and scrolls. It holds note cards and result chips in the order they happened. The newest item is at the bottom, and the list auto-scrolls to it unless the tech scrolled up. New items slide up and fade in (200 ms).
+- **Transcript** is a collapsed section at the end of the feed ("Transcript (n)"). It is secondary.
+- **Dock** is fixed at the bottom with the mic and one secondary button. It has a solid `--color-bg` background and a top border.
+- The screen stays awake while a session is active (`useWakeLock` in the session options).
 
 #### Mic button states
 
 | State | Look | Caption |
 | --- | --- | --- |
 | Idle | Orange filled circle, mic icon | "Tap to talk to VacMan" |
+| Sandbox warming | Orange circle, dimmed, disabled | "Warming up the sandbox…" |
 | Connecting | Orange ring spins | "Connecting…" |
 | Listening | Orange circle with a slow pulsing ring | "Listening…" |
-| Speaking | Ring becomes 3 animated bars (white), circle stays orange | "VacMan is talking" |
+| Speaking | 3 animated bars (white) in the orange circle | "VacMan is talking" |
 | Error / mic blocked | Gray circle, red caption | "Mic is blocked. Tap here to fix" |
 
 - One tap starts the session. One tap ends it. The tech does not hold the button.
-- Drive Listening and Speaking from the `mode` of the `@elevenlabs/react` hook.
+- Listening and Speaking come from `mode` of the `@elevenlabs/react` hook.
 - Respect `prefers-reduced-motion`: replace the pulse with a static ring.
 
-#### Timeline cards
+#### Cards and chips
 
-- Left border 4 px in type color. Label (uppercase), then the main text, then quantity or minutes on the right.
-- The time is dim and small, bottom right.
-- **Substitute card:** orange border. Title "Substitute for 45/5 µF". Lists up to 3 options. Each row shows part number, name, price and a one-line "why". Rows are 56 px tall.
-- **Undo:** when `undo_last` removes an event, the card fades out and a dim line shows "Removed: 40/5 µF capacitor". Do not add an undo button. The tech says "scratch that".
-- **Empty state:** like ChatGPT's first screen, ask one question in large text, "What are you working on?", with a dim line below it, "Tap the mic and tell VacMan." Do not show an illustration.
+- **Note card:** left border 4 px in the category color. Icon and label (uppercase), then the note text, then the quantity on the right (`×2`). The item code is dim at the bottom left and the time at the bottom right.
+- **Result chip:** a rounded pill for a tool result, for example "Calc · Superheat 26°F" or "Invoice · INV-0001 · $707.92". A failed tool shows the chip in red with the error.
+- **Undo:** when `log_job_note` removes a note, the card is replaced by a dim line "Removed: {text}". No undo button. The tech says "scratch that".
+- **Empty state:** a dim centered line, "Nothing logged yet. Tap the mic and say what you see." No illustration.
 
-### 4.3 Invoice sheet
+#### Secondary button
 
-Opens as a bottom sheet when the `generate_invoice` event arrives.
+- Before the invoice: **Wrap up the job**. It sends "Wrap up the job" to the agent, the same as speaking it. It is disabled when no session is running.
+- After the invoice exists: **View invoice**. It reopens the sheet.
+
+### 4.2 Invoice sheet
+
+Opens as a bottom sheet when the `create_invoice` tool returns.
 
 ```
 ┌──────────────────────────┐
 │          ───             │  drag handle
-│ Invoice ready            │
-│ $487.50                  │  48 bold
-│ Garcia · 412 Palm St     │  dim
+│ Invoice INV-0001         │
+│ $707.92                  │  48 bold
+│ Linda Johnson · 5520...  │  dim
+│ Sent to office for review│  green
 │ ┌──────────────────────┐ │
-│ │ Trip fee      $89.00 │ │
-│ │ Labor 1.5h   $165.00 │ │
-│ │ Capacitor     $48.00 │ │
-│ │ Tax           $x.xx  │ │
+│ │ Diagnostic fee $x    │ │
+│ │ Leak search    $x    │ │
+│ │ R-410A ×2 lb   $x    │ │
+│ │ Tax            $x    │ │
+│ └──────────────────────┘ │
+│ ┌──────────────────────┐ │
+│ │ PDF preview          │ │
 │ └──────────────────────┘ │
 │ [ Download invoice ]     │  primary, orange
-│ [ Print ]  [ View full ] │  secondary
+│ [ Print ]                │  secondary
+│ Done                     │
 └──────────────────────────┘
 ```
 
-- The sheet covers about 85% of the screen. The total is the biggest thing on it, like a balance on Coinbase.
-- A single primary button: **Download invoice**. It saves the final invoice as a file. The contractor then emails or shares it. The app does not send anything. Secondary buttons are outlined, not filled.
-- "View full" loads `/invoices/{job_id}` in an iframe inside the sheet.
-- Close by tapping the handle, the dimmed area, or an explicit "Done" button. Do not rely on swipe alone.
+- The sheet covers about 85% of the screen. The total is the biggest thing on it.
+- The PDF comes from `pdfBase64` in the `/api/sandbox/invoice` answer. It is shown in an iframe and saved as a real `.pdf` by **Download invoice**. The app does not send anything. The contractor shares the file.
+- Items the price book could not price show a red line, "Not priced: {codes}".
+- Close by tapping the handle, the dimmed area, or "Done". Do not rely on swipe alone.
+
+### 4.3 Console — `src/app/console/page.tsx`
+
+A second page for the team and the finals, opened in another tab of the same browser. It is a plain dark page for a laptop, not a phone. It shows the transcript with time and detected language (with a latency badge on each agent turn), the tool calls with arguments, result and duration, and a Daytona panel with the sandbox status and the code the agent wrote with its output. The badge is green below 1.5 s and red above.
 
 ## 5. Components
 
@@ -200,14 +188,14 @@ Build these in `src/components/`. Keep each one small.
 
 | Component | Notes |
 | --- | --- |
-| `JobCard` | Props: customer, address, time, equipment, complaint, status. |
-| `JobHeader` | Sticky. Customer, address, equipment, complaint. |
-| `MicDock` | Mic button, caption, Close-out button. Owns the state table in §4.2. |
-| `Timeline` | Polls `/api/jobs/{id}/events` every 2 s. Renders `EventCard`. |
-| `EventCard` | One card per event type, by the color table in §3. |
-| `SubstituteCard` | Special card for `find_substitute` results. |
-| `InvoiceSheet` | Bottom sheet from §4.3. |
-| `VoiceAgent` | Existing file. Adapt it to start the session with `dynamicVariables`. |
+| `VoiceAgent` | The session. Starts the sandbox, registers the 3 client tools, owns the feed and sends console events. |
+| `WorkOrderHeader` | Sticky. Job, sandbox status, customer, address, equipment, complaint. |
+| `Timeline` | The scrolling feed and the transcript section. |
+| `NoteCard` | One card per note, colored by category. |
+| `ResultChip` | A tool result. |
+| `MicDock` | Mic button, caption, secondary button. Owns the state table in §4.1. |
+| `InvoiceSheet` | Bottom sheet from §4.2. |
+| `Console` | The console page from §4.3. |
 
 ## 6. Interaction rules
 
@@ -227,15 +215,14 @@ Build these in `src/components/`. Keep each one small.
 
 ## 8. Build order (Jake)
 
-1. Add the color tokens and system font to `globals.css`. Set the viewport to `width=device-width, initial-scale=1, viewport-fit=cover`.
-2. Job list with a mock array.
-3. Job session shell: header, empty timeline, `MicDock` in the idle state.
-4. Wire `VoiceAgent` to the mic states.
-5. Timeline polling and `EventCard` types.
-6. `SubstituteCard`.
-7. `InvoiceSheet`.
-8. Polish: spacing, empty and loading states, safe areas, test on a real phone over the Vercel HTTPS URL.
+1. Tokens, system font and viewport in `globals.css` and `layout.tsx`.
+2. Phone view shell: header, empty feed, `MicDock`.
+3. Sandbox warm-up and the sandbox status.
+4. Voice and the 3 client tools (`log_job_note`, `run_python`, `create_invoice`).
+5. Invoice sheet with the PDF.
+6. Console events and the console page.
+7. Polish: spacing, empty and loading states, safe areas, test on a real phone. A phone cannot reach `localhost` on the laptop, so use the laptop in a phone-size window, or a tunnel only for that test.
 
 ## 9. Out of scope today
 
-Light theme, desktop layout, login, settings, search, offline mode, and any animation beyond the ones listed here.
+Light theme, desktop layout for the phone view, login, settings, search, a list of jobs, offline mode, sending the invoice (email or SMS), and any animation beyond those listed here.
