@@ -13,12 +13,11 @@
   --color-ok: #34c759;
   --color-danger: #ff453a;
 
-  /* Event type colors */
-  --color-part: #4da3ff;
-  --color-tool: #a78bfa;
-  --color-labor: #34c759;
-  --color-damage: #ff453a;
-  --color-note: #a1a5ad;
+  /* Job note category colors */
+  --color-finding: #4da3ff;
+  --color-measurement: #a78bfa;
+  --color-repair: #34c759;
+  --color-part: #f2c14e;
 
   --font-sans: -apple-system, BlinkMacSystemFont, Roboto, "Segoe UI", sans-serif;
 

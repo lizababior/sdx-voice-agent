@@ -1,19 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { JobEvent } from "@/lib/types";
-import { EventCard } from "./EventCard";
-import { SubstituteCard } from "./SubstituteCard";
+import type { FeedItem } from "@/lib/vacman";
+import { NoteCard } from "./NoteCard";
+import { ResultChip } from "./ResultChip";
 
-export function Timeline({
-  events,
-  fresh,
-  error,
-}: {
-  events: JobEvent[];
-  fresh: Set<number>;
-  error: boolean;
-}) {
+export type TranscriptLine = { id: number; role: "user" | "agent"; text: string };
+
+export function Timeline({ feed, transcript }: { feed: FeedItem[]; transcript: TranscriptLine[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
 
@@ -27,26 +21,42 @@ export function Timeline({
   useEffect(() => {
     const el = ref.current;
     if (el && nearBottom.current) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [events]);
-
-  // The invoice has its own sheet, so it does not show as a card.
-  const visible = events.filter((e) => e.type !== "invoice");
+  }, [feed]);
 
   return (
     <div ref={ref} onScroll={onScroll} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
-      {error && <p className="text-danger">Lost connection. Retrying.</p>}
-      {visible.length === 0 ? (
+      {feed.length === 0 ? (
         <p className="m-auto max-w-72 text-center text-text-dim">
-          Nothing logged yet. Tap the mic and say what you did.
+          Nothing logged yet. Tap the mic and say what you see.
         </p>
       ) : (
-        visible.map((e) =>
-          e.type === "substitute" ? (
-            <SubstituteCard key={e.id} event={e} isNew={fresh.has(e.id)} />
+        feed.map((item) =>
+          item.kind === "chip" ? (
+            <ResultChip key={item.id} item={item} />
+          ) : item.removed ? (
+            <p key={item.id} className="px-1 text-text-dim">
+              Removed: {item.note.text}
+            </p>
           ) : (
-            <EventCard key={e.id} event={e} isNew={fresh.has(e.id)} />
+            <NoteCard key={item.id} note={item.note} time={item.time} />
           ),
         )
+      )}
+
+      {transcript.length > 0 && (
+        <details className="mt-2 rounded-card border border-line bg-surface">
+          <summary className="flex min-h-14 cursor-pointer items-center px-4 font-semibold">
+            Transcript ({transcript.length})
+          </summary>
+          <ul className="flex flex-col gap-2 px-4 pb-4">
+            {transcript.map((l) => (
+              <li key={l.id} className={l.role === "user" ? "text-text" : "text-text-dim"}>
+                <span className="font-semibold">{l.role === "user" ? "You" : "VacMan"}: </span>
+                {l.text}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
     </div>
   );

@@ -35,17 +35,22 @@ export function MicDock({
   state,
   errorText,
   note,
+  startDisabled = false,
+  secondaryLabel,
   onToggle,
-  onCloseOut,
-  closeOutDisabled,
+  onSecondary,
+  secondaryDisabled,
 }: {
   state: MicState;
   errorText?: string | null;
   /** Extra line under the caption, for example "Building invoice…". */
   note?: string | null;
+  /** Blocks starting a session, for example while the sandbox warms up. */
+  startDisabled?: boolean;
+  secondaryLabel: string;
   onToggle: () => void;
-  onCloseOut: () => void;
-  closeOutDisabled: boolean;
+  onSecondary: () => void;
+  secondaryDisabled: boolean;
 }) {
   const on = state === "listening" || state === "speaking" || state === "connecting";
   const isError = state === "error";
@@ -54,9 +59,10 @@ export function MicDock({
       <button
         type="button"
         onClick={onToggle}
+        disabled={startDisabled && !on}
         aria-pressed={on}
         aria-label={on ? "End session" : "Start talking to VacMan"}
-        className={`relative flex size-28 items-center justify-center rounded-full active:scale-95 ${
+        className={`relative flex size-28 items-center justify-center rounded-full active:scale-95 disabled:opacity-50 ${
           isError ? "bg-surface-2 text-text-dim" : "bg-accent text-accent-ink"
         }`}
       >
@@ -75,11 +81,11 @@ export function MicDock({
 
       <button
         type="button"
-        onClick={onCloseOut}
-        disabled={closeOutDisabled}
+        onClick={onSecondary}
+        disabled={secondaryDisabled}
         className="h-14 w-full rounded-button border border-line text-lg font-semibold active:bg-surface-2 disabled:text-text-dim disabled:opacity-60"
       >
-        Close out job
+        {secondaryLabel}
       </button>
     </div>
   );

@@ -2,7 +2,7 @@
 
 Nov 8, 2026 · Liz, Jake, Deandre
 
-This is the main build doc. It replaces `VacMan-3-Person-Build-Plan.md` (v1), which stays for history. When v1 and v2 disagree, v2 is correct.
+This is the main build doc.
 
 **How to read this doc:** everyone reads sections 1 to 5. Then read your own role in section 6. Section 9 gives the reason for each decision. Read it before you change a decision.
 
