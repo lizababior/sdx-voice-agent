@@ -42,7 +42,7 @@ Browser (src/components/VoiceAgent.tsx)
        create_invoice → POST /api/sandbox/invoice → invoice PDF
 ```
 
-The phone view is `/`. The console is `/console`. Open both in the same browser. See `Docs/VacMan-Build-Plan-v2.md`.
+The home page is `/`, the job session is `/job` and the console is `/console`. Open both in the same browser. See `Docs/VacMan-Build-Plan-v2.md`.
 
 | File | Contents |
 |---|---|

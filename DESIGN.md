@@ -87,13 +87,33 @@ Each note card has a 4 px left border and a small icon and label in its category
 
 ## 4. Screens
 
-### 4.1 Phone view — `src/app/page.tsx` (the main screen)
+### 4.1 Home — `src/app/page.tsx`
 
-There is one work order, so there is no job list. The page opens straight into the job.
+The home page has a greeting and one job card. There is one work order, so the list holds one job. The page also starts the Daytona sandbox, so it is often warm when the tech opens the job.
 
 ```
 ┌──────────────────────────┐
-│ JOB-1042   ● Sandbox warm│  status, 40 px target
+│ Hi, Maria                │  28 bold
+│ Sun, Nov 8 · 1 job today │  dim
+│                          │
+│ TODAY                    │  label
+│ ┌──────────────────────┐ │
+│ │ ● Linda Johnson      │ │  status dot + customer
+│ │ 5520 Montezuma Rd... │ │
+│ │ Carrier 3-ton · R-410A│ │
+│ │ No cooling...      › │ │
+│ └──────────────────────┘ │
+└──────────────────────────┘
+```
+
+- The whole card is one tap target (minimum height 96 px) and opens `/job`.
+- No bottom nav, no menu, no search.
+
+### 4.2 Job session — `src/app/job/page.tsx` (the main screen)
+
+```
+┌──────────────────────────┐
+│ ‹ Jobs     ● Sandbox warm│  back (56 px target), status
 │ Linda Johnson            │  28 bold
 │ 5520 Montezuma Rd...     │  dim
 │ Carrier 3-ton · R-410A   │  dim
@@ -113,7 +133,7 @@ There is one work order, so there is no job list. The page opens straight into t
 └──────────────────────────┘
 ```
 
-- **Header** is compact and sticky. It shows the job ID, the sandbox status, the customer, the address, the equipment with refrigerant and metering device, and the complaint (2 lines).
+- **Header** is compact and sticky. It shows a back link to the home page, the sandbox status, the customer, the address, the equipment with refrigerant and metering device, and the complaint (2 lines).
 - **Sandbox status:** "warming" (orange dot), "warm" (green), "failed" (red, tap to retry). The page starts the sandbox when it opens. The mic stays disabled with the caption "Warming up the sandbox…" until the sandbox is warm or has failed.
 - **Feed** takes the middle and scrolls. It holds note cards and result chips in the order they happened. The newest item is at the bottom, and the list auto-scrolls to it unless the tech scrolled up. New items slide up and fade in (200 ms).
 - **Transcript** is a collapsed section at the end of the feed ("Transcript (n)"). It is secondary.
@@ -147,7 +167,7 @@ There is one work order, so there is no job list. The page opens straight into t
 - Before the invoice: **Wrap up the job**. It sends "Wrap up the job" to the agent, the same as speaking it. It is disabled when no session is running.
 - After the invoice exists: **View invoice**. It reopens the sheet.
 
-### 4.2 Invoice sheet
+### 4.3 Invoice sheet
 
 Opens as a bottom sheet when the `create_invoice` tool returns.
 
@@ -178,7 +198,7 @@ Opens as a bottom sheet when the `create_invoice` tool returns.
 - Items the price book could not price show a red line, "Not priced: {codes}".
 - Close by tapping the handle, the dimmed area, or "Done". Do not rely on swipe alone.
 
-### 4.3 Console — `src/app/console/page.tsx`
+### 4.4 Console — `src/app/console/page.tsx`
 
 A second page for the team and the finals, opened in another tab of the same browser. It is a plain dark page for a laptop, not a phone. It shows the transcript with time and detected language (with a latency badge on each agent turn), the tool calls with arguments, result and duration, and a Daytona panel with the sandbox status and the code the agent wrote with its output. The badge is green below 1.5 s and red above.
 
@@ -189,13 +209,14 @@ Build these in `src/components/`. Keep each one small.
 | Component | Notes |
 | --- | --- |
 | `VoiceAgent` | The session. Starts the sandbox, registers the 3 client tools, owns the feed and sends console events. |
-| `WorkOrderHeader` | Sticky. Job, sandbox status, customer, address, equipment, complaint. |
+| `Home` | Greeting and the one job card. Starts the sandbox. |
+| `WorkOrderHeader` | Sticky. Back link, sandbox status, customer, address, equipment, complaint. |
 | `Timeline` | The scrolling feed and the transcript section. |
 | `NoteCard` | One card per note, colored by category. |
 | `ResultChip` | A tool result. |
-| `MicDock` | Mic button, caption, secondary button. Owns the state table in §4.1. |
-| `InvoiceSheet` | Bottom sheet from §4.2. |
-| `Console` | The console page from §4.3. |
+| `MicDock` | Mic button, caption, secondary button. Owns the state table in §4.2. |
+| `InvoiceSheet` | Bottom sheet from §4.3. |
+| `Console` | The console page from §4.4. |
 
 ## 6. Interaction rules
 
@@ -216,7 +237,7 @@ Build these in `src/components/`. Keep each one small.
 ## 8. Build order (Jake)
 
 1. Tokens, system font and viewport in `globals.css` and `layout.tsx`.
-2. Phone view shell: header, empty feed, `MicDock`.
+2. Home page, then the job session shell: header, empty feed, `MicDock`.
 3. Sandbox warm-up and the sandbox status.
 4. Voice and the 3 client tools (`log_job_note`, `run_python`, `create_invoice`).
 5. Invoice sheet with the PDF.
@@ -225,4 +246,4 @@ Build these in `src/components/`. Keep each one small.
 
 ## 9. Out of scope today
 
-Light theme, desktop layout for the phone view, login, settings, search, a list of jobs, offline mode, sending the invoice (email or SMS), and any animation beyond those listed here.
+Light theme, desktop layout for the phone view, login, settings, search, more than one job, offline mode, sending the invoice (email or SMS), and any animation beyond those listed here.

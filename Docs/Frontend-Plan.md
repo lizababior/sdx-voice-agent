@@ -9,7 +9,7 @@ This plan follows [VacMan-Build-Plan-v2.md](VacMan-Build-Plan-v2.md), which is t
 - One Next.js app (this repo) on **localhost**. No separate backend, no ngrok, no Vercel. The mic works on localhost without HTTPS.
 - The agent tools are **client tools**. The phone page runs them in the browser. Handlers call `/api/sandbox/*` (Deandre). Those routes call Daytona with the server-side key. The browser never has an API key.
 - The phone page sends console events over `BroadcastChannel("vacman")`. `/console` listens. Both pages must be open in the same browser.
-- One work order: `data/work-order.json` (the Johnson job). There is no job list.
+- One work order: `data/work-order.json` (the Johnson job). The home page shows it as the only job card.
 
 Next.js 16 rules that apply (docs in `node_modules/next/dist/docs/01-app/`):
 
@@ -24,10 +24,12 @@ src/
   app/
     layout.tsx            Viewport, dark body, system font
     globals.css           Design tokens (DESIGN.md §3)
-    page.tsx              Phone view. Reads data/work-order.json
+    page.tsx              Home: greeting and the one job card
+    job/page.tsx          Job session. Reads data/work-order.json
     console/page.tsx      Console
     api/                  conversation-token, sandbox/* (Deandre)
   components/
+    Home.tsx              Greeting, the job card, starts the sandbox
     VoiceAgent.tsx        Session: sandbox warm-up, 3 tools, feed, console events
     WorkOrderHeader.tsx   Sticky header with sandbox status
     Timeline.tsx          Feed + transcript
@@ -40,6 +42,7 @@ src/
     vacman.ts             Types, categories, base64 -> PDF blob URL
     bus.ts                BroadcastChannel events with history replay
     lang.ts               Language guess for the console
+    sandboxClient.ts      One sandbox start per page load
     format.ts             Clock and money formatting
     daytona.ts            Existing (smoke test)
 ```
@@ -63,7 +66,8 @@ Every call sends `tool_start` and `tool_end` to the console. Latency is the time
 | Item | State |
 | --- | --- |
 | Tokens, font, viewport | Done |
-| Phone view, mic states, feed, chips, transcript | Done |
+| Home page with the one job card | Done |
+| Job session, mic states, feed, chips, transcript | Done |
 | Sandbox warm-up and status, retry | Done |
 | 3 client tools | Done, untested with the live agent |
 | Dynamic variables (all 8) | Done |
@@ -76,7 +80,7 @@ Every call sends `tool_start` and `tool_end` to the console. Latency is the time
 
 Needs `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` (run `npm run agent:setup` after every pull) and `DAYTONA_API_KEY` in `.env.local`.
 
-1. `npm run dev`. Open `/` and `/console` in two tabs of the same browser.
+1. `npm run dev`. Open `/` and `/console` in two tabs of the same browser. Tap the job card to open `/job`.
 2. The sandbox status goes from "warming" to "warm". The mic is disabled until then.
 3. Run the demo script from v2 section 3, line by line. Check:
    - Notes appear with the right category, and the quantity shows.

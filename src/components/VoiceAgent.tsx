@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation, useConversationClientTool } from "@elevenlabs/react";
 import { emit, hostBus } from "@/lib/bus";
 import { detectLanguage } from "@/lib/lang";
+import { warmSandbox } from "@/lib/sandboxClient";
 import {
   asCategory,
   pdfBlobUrl,
@@ -24,23 +25,6 @@ export function VoiceAgent({ workOrder }: { workOrder: WorkOrder }) {
       <Session workOrder={workOrder} />
     </ConversationProvider>
   );
-}
-
-// One sandbox start per page load. React strict mode runs effects twice in dev,
-// and a second start would delete the first sandbox.
-let sandboxStart: Promise<string> | null = null;
-function warmSandbox(): Promise<string> {
-  sandboxStart ??= fetch("/api/sandbox/start", { method: "POST" })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok || data.status !== "warm") throw new Error(data.error ?? "Sandbox failed");
-      return data.sandboxId as string;
-    })
-    .catch((err) => {
-      sandboxStart = null;
-      throw err;
-    });
-  return sandboxStart;
 }
 
 async function postJson(path: string, body: unknown) {

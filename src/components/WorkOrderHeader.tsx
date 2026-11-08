@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SandboxStatus, WorkOrder } from "@/lib/vacman";
 
 const SANDBOX: Record<SandboxStatus, { dot: string; text: string }> = {
@@ -18,8 +19,10 @@ export function WorkOrderHeader({
   const s = SANDBOX[sandbox];
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-bg px-4 pt-3 pb-3">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-text-dim">{workOrder.job_id}</p>
+      <div className="-mt-1 flex items-center justify-between gap-3">
+        <Link href="/" className="flex h-14 items-center pr-6 text-text-dim active:text-text">
+          ‹ Jobs
+        </Link>
         <button
           type="button"
           onClick={onRetry}
