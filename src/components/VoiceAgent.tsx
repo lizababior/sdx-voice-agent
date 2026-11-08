@@ -45,6 +45,8 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True from the "Wrap up the job" tap until VacMan answers. More taps would interrupt the answer.
+  const [wrapPending, setWrapPending] = useState(false);
 
   // Refs hold the latest values for the tool handlers, which can run between renders.
   const feedRef = useRef<FeedItem[]>([]);
@@ -85,13 +87,14 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
     connectSandbox();
   }, []);
 
-  const { status, mode, startSession, endSession, sendUserMessage } = useConversation({
+  const { status, mode, startSession, endSession, sendUserMessage, sendContextualUpdate } = useConversation({
     onMessage: ({ role, message }) => {
       const r = role === "user" ? "user" : "agent";
       setTranscript((t) => [...t, { id: ++counter.current, role: r, text: message }]);
       emit({ event: "transcript", role: r, text: message, language: detectLanguage(message) });
       // The user line arrives when the transcript is final. The next "speaking" ends the turn.
       if (r === "user") lastUserAt.current = Date.now();
+      if (r === "agent") setWrapPending(false);
     },
     onModeChange: ({ mode }) => {
       if (mode === "speaking" && lastUserAt.current) {
@@ -100,7 +103,10 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
       }
     },
     onError: (message: string) => setError(message),
-    onDisconnect: () => setError(null),
+    onDisconnect: () => {
+      setError(null);
+      setWrapPending(false);
+    },
   });
 
   /** Runs a tool handler and sends start and end events to the console. */
@@ -197,6 +203,24 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
   const connected = status === "connected";
   const connecting = status === "connecting";
 
+  // A new call starts with an empty agent memory. When the page already has notes (for example
+  // after a dropped call), tell the agent what is logged, so it continues the job.
+  useEffect(() => {
+    if (!connected) return;
+    const notes = activeNotes();
+    if (notes.length === 0) return;
+    const lines = notes.map(
+      (n) => `${n.id}: ${n.text}${n.item_code ? ` (${n.item_code} x${n.quantity ?? 1})` : ""}`,
+    );
+    sendContextualUpdate(
+      `This call continues a job in progress. These job notes are already logged, with their note_id: ${lines.join("; ")}.` +
+        (invoice ? ` Invoice ${invoice.invoiceNumber} is already created.` : "") +
+        " Continue from here, and use these note_id values to remove a note.",
+    );
+    // Runs once per connection. The notes come from the ref at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected]);
+
   async function start() {
     setError(null);
     try {
@@ -262,9 +286,14 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
           note={!connected && sandbox === "warming" ? "Warming up the sandbox…" : null}
           startDisabled={sandbox === "warming"}
           onToggle={toggle}
-          secondaryLabel={hasInvoice ? "View invoice" : "Wrap up the job"}
-          onSecondary={() => (hasInvoice ? setSheetOpen(true) : sendUserMessage("Wrap up the job"))}
-          secondaryDisabled={!hasInvoice && !connected}
+          secondaryLabel={hasInvoice ? "View invoice" : wrapPending ? "Wrapping up…" : "Wrap up the job"}
+          onSecondary={() => {
+            if (hasInvoice) return setSheetOpen(true);
+            if (wrapPending) return;
+            setWrapPending(true);
+            sendUserMessage("Wrap up the job");
+          }}
+          secondaryDisabled={!hasInvoice && (!connected || wrapPending)}
         />
       </div>
       {sheetOpen && invoice && (
