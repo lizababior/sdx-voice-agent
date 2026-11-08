@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import {
-  AGENT_NAME, CLIENT_TOOLS, DYNAMIC_VARIABLES, EXTRA_LANGUAGES, FIRST_MESSAGE,
+  AGENT_NAME, ASR_KEYWORDS, CLIENT_TOOLS, DYNAMIC_VARIABLES, EXTRA_LANGUAGES, FIRST_MESSAGE,
   KNOWLEDGE_BASE, LANGUAGE, LLM, SYSTEM_PROMPT, VOICE_ID,
 } from "../agent/config.ts";
 
@@ -75,6 +75,7 @@ const conversationConfig = {
       },
     },
   },
+  asr: { keywords: ASR_KEYWORDS },
   // expressiveMode off: the agent writes plain text, with no audio tags such as [happy].
   tts: { voiceId: VOICE_ID, expressiveMode: false },
   languagePresets: Object.fromEntries(
