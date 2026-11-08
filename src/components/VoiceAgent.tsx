@@ -28,8 +28,8 @@ function Agent() {
     onError: (message: string) => setError(message),
   });
 
-  // Client tool: the agent calls this; we run the code on Daytona via our API route.
-  // The name and params must match agent/config.ts.
+  // Handler for the run_code tool. It sends the code to /api/run-code, which runs it on Daytona.
+  // The name and parameters must agree with the definition in agent/config.ts.
   useConversationClientTool("run_code", async ({ code, language }: Record<string, unknown>) => {
     log({ role: "tool", text: `run_code (${language})\n${code}` });
     const res = await fetch("/api/run-code", {

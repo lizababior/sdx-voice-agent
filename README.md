@@ -1,58 +1,74 @@
 # SDx Voice Agent
 
-Starter for the SDxSDSU Voice Agent Hackathon (ElevenLabs + Daytona). The voice loop already works end to end, so we spend the afternoon on the idea.
+Starter for the SDxSDSU Voice Agent Hackathon (ElevenLabs + Daytona). The voice loop works from end to end. Use the build time for the idea.
 
-**Schedule:** kickoff 12:00 (the prompt is revealed in the room) · demos from 4:30 · winners before 6.
+**Schedule:** kickoff at 12:00 (the organizers give the prompt in the room). Demos start at 4:30. Winners before 6:00.
 
-## Before kickoff (everyone)
+## Before kickoff
 
-- [ ] Send your GitHub username so you can be added to this repo
-- [ ] Redeem the ElevenLabs credits (instructions were sent to your RSVP email)
-- [ ] Redeem the Daytona credits (same email)
-- [ ] Clone the repo, run `npm install`, then do the setup below
-- [ ] `npm run smoke` prints all `PASS`
+Each team member does these steps:
+
+- [ ] Send your GitHub username to the team lead.
+- [ ] Redeem the ElevenLabs credits. The instructions are in your RSVP email.
+- [ ] Redeem the Daytona credits. The instructions are in the same email.
+- [ ] Do the steps in [Setup](#setup).
+- [ ] Make sure that `npm run smoke` shows `PASS` on all lines.
 
 ## Setup
 
-```bash
-git clone <repo-url> && cd sdx-voice-agent
-npm install
-cp .env.example .env.local      # fill in keys (see below)
-npm run agent:setup             # first run creates the agent and prints ELEVENLABS_AGENT_ID
-npm run smoke                   # checks keys, token minting and a Daytona sandbox run
-npm run dev                     # http://localhost:3000, click "Start talking"
-```
+1. Clone the repo and install the packages:
+   ```bash
+   git clone https://github.com/lizababior/sdx-voice-agent.git
+   cd sdx-voice-agent
+   npm install
+   ```
+2. Copy the env file: `cp .env.example .env.local`.
+3. Put your ElevenLabs API key and your Daytona API key in `.env.local`. Use your own keys. They come from your redeemed credits.
+4. Run `npm run agent:setup`. The command creates your agent and shows its ID.
+5. Put the ID in `.env.local` as `ELEVENLABS_AGENT_ID`.
+6. Run `npm run smoke`. All lines must show `PASS`.
+7. Run `npm run dev`. Open http://localhost:3000 and click **Start talking**.
 
-**Keys:** everyone uses their **own** ElevenLabs and Daytona keys (from your redeemed credits). No keys are shared. `npm run agent:setup` creates your own copy of the agent from `agent/config.ts`, so all copies stay identical as long as changes go into that file (not the ElevenLabs dashboard). After pulling someone's change to `agent/config.ts`, run `npm run agent:setup` again.
+## The agent
 
-Leave `DAYTONA_API_URL` out of `.env.local`: the SDK rejects it from a project `.env` file, and the default (`https://app.daytona.io/api`) is correct.
+Each team member has a copy of the agent in their own ElevenLabs account. `agent/config.ts` is the single source of truth for all copies. It holds the prompt, the first message and the tools.
+
+To change the agent:
+
+1. Edit `agent/config.ts`.
+2. Run `npm run agent:setup`.
+3. Push the change. Each team member pulls it and runs `npm run agent:setup`.
+
+`npm run agent:setup` overwrites the prompt, the first message and the tools in ElevenLabs. Other settings, such as the voice and the LLM, stay as they are. You change those settings in the ElevenLabs dashboard, and each team member must change them in their own account.
 
 ## How it works
 
 ```
 Browser (src/components/VoiceAgent.tsx)
-  ├─ GET  /api/conversation-token  → ElevenLabs WebRTC token (API key stays on the server)
+  ├─ GET  /api/conversation-token  → ElevenLabs WebRTC token (the API key stays on the server)
   ├─ live voice session with the ElevenLabs agent (@elevenlabs/react)
-  └─ agent calls client tool run_code → POST /api/run-code → Daytona ephemeral sandbox → stdout back to the agent
+  └─ the agent calls the run_code tool → POST /api/run-code → Daytona sandbox → output goes back to the agent
 ```
 
-| File | What to change |
+| File | Contents |
 |---|---|
-| `agent/config.ts` | System prompt, first message and tools. **Edit this first when the prompt drops**, then run `npm run agent:setup` |
-| `src/components/VoiceAgent.tsx` | UI and client-tool handlers (`useConversationClientTool`) |
-| `src/app/api/*` | Server routes. Add more tool backends here |
-| `src/lib/daytona.ts` | Daytona sandbox helper |
+| `agent/config.ts` | Agent prompt, first message and tools |
+| `src/components/VoiceAgent.tsx` | UI and tool handlers |
+| `src/app/api/*` | Server routes for tools |
+| `src/lib/daytona.ts` | Runs code in a Daytona sandbox |
 
 ### Adding a tool
 
-1. Add it to `CLIENT_TOOLS` in `agent/config.ts` (name, description, parameters).
-2. Register a handler with the same name in `VoiceAgent.tsx` using `useConversationClientTool("name", async (params) => ...)`.
+A tool has two parts with the same name: a definition and a handler.
+
+1. Add the definition to `CLIENT_TOOLS` in `agent/config.ts`. Give the name, the description and the parameters.
+2. Add the handler in `src/components/VoiceAgent.tsx` with `useConversationClientTool("<name>", async (params) => ...)`.
 3. Run `npm run agent:setup`.
 
-Client tools run in the browser, so they work on localhost without a public URL.
+The handler runs in the browser. Thus the tool works on localhost and needs no public URL.
 
 ## Demo tips
 
-- The microphone needs `localhost` or HTTPS. To demo from another device, deploy: `npx vercel` and add the three env vars in the Vercel project.
-- Test on the venue Wi-Fi early. Have a backup laptop with `.env.local` ready.
-- Agent voice and LLM can be changed in the ElevenLabs dashboard (Agents → your agent). `agent:setup` only overwrites the prompt, first message and tools.
+- The microphone works only on `localhost` or HTTPS. Do the demo on `localhost` if possible.
+- If you deploy (`npx vercel`), `/api/run-code` becomes public. Anyone with the URL can then run code on your Daytona credits. Delete the deployment after the demo.
+- Test on the venue Wi-Fi early. Prepare a second laptop with a working `.env.local`.

@@ -6,7 +6,7 @@ import { AGENT_NAME, CLIENT_TOOLS, FIRST_MESSAGE, SYSTEM_PROMPT } from "../agent
 const client = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 const agentId = process.env.ELEVENLABS_AGENT_ID;
 
-// Upsert each tool by name so re-running does not create duplicates.
+// Find each tool by name and update it. This prevents duplicate tools when you run the script again.
 const { tools: existing } = await client.conversationalAi.tools.list();
 const toolIds: string[] = [];
 for (const toolConfig of CLIENT_TOOLS) {
