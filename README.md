@@ -58,5 +58,6 @@ The handler runs in the browser. Thus the tool works on localhost and needs no p
 ## Demo tips
 
 - The microphone works only on `localhost` or HTTPS. Do the demo on `localhost` if possible.
-- If you deploy (`npx vercel`), `/api/run-code` becomes public. Anyone with the URL can then run code on your Daytona credits. Delete the deployment after the demo.
+- On Vercel, `/api/run-code` returns 404, so nobody can run code on your Daytona credits through a deployment. The route still works on localhost.
+- Set `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID` in the Vercel project settings. `.env.local` is not deployed. `/api/conversation-token` needs both.
 - Test on the venue Wi-Fi early. Prepare a second laptop with a working `.env.local`.
