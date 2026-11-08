@@ -23,12 +23,17 @@ Agree on this first. After that, each person builds alone against mocks until th
 /backend    main.py, db.py, daytona_runner.py, sandbox/matcher.py, sandbox/invoice.py
 /data       jobs.json, parts.csv, pricing.json
 /kb         business.md, troubleshooting.md, past_jobs.md
-/frontend   index.html (job list), job.html (VacMan session), app.js
+/src/app          Next.js frontend: page.tsx (job list), jobs/[id]/page.tsx (VacMan session)
+/src/components   VoiceAgent.tsx and the timeline, job card and invoice panel components
 ```
 
-### API
+**Hosting.** The frontend is the Next.js app in this repo, deployed on Vercel. Vercel gives the phone a stable HTTPS URL, which the mic requires. The Python backend is FastAPI on Deandre's laptop, exposed through ngrok. FastAPI serves only the API and `/invoices/{job_id}`.
 
-**API.** FastAPI also serves `/frontend`, so everything sits behind one ngrok HTTPS URL. The phone mic requires HTTPS.
+The Next.js app proxies `/api/jobs/*` and `/invoices/*` to the ngrok URL with `rewrites` in `next.config`. The ngrok URL is the Vercel env var `BACKEND_URL`. The rewrite adds the header `ngrok-skip-browser-warning: 1`. The ElevenLabs tools call the ngrok URL directly.
+
+If ngrok restarts, the URL changes. Liz updates the 4 tools. Jake updates `BACKEND_URL` in Vercel and redeploys. A reserved ngrok domain avoids this.
+
+### API
 
 | Endpoint | Body | Returns |
 | --- | --- | --- |
@@ -48,7 +53,7 @@ The frontend passes `job_id`, `customer_name`, `equipment` and `complaint` to th
 
 This person owns the server, the database and everything that runs in Daytona.
 
-- [ ] **2:05 — Stub server.** Build the FastAPI skeleton with every endpoint returning hardcoded stub JSON. Start ngrok and post the URL in the group chat by 2:20. This unblocks the other two.
+- [ ] **2:05 — Stub server.** Build the FastAPI skeleton with every endpoint returning hardcoded stub JSON. Start ngrok (use a reserved domain if you have one) and post the URL in the group chat by 2:20. This unblocks the other two. Jake puts the URL in Vercel as `BACKEND_URL`. If the URL changes, post it again.
 - [ ] **2:20 — Database.** Set up SQLite in `db.py` with `jobs` and `events` tables, seeded from `data/jobs.json` (use placeholder rows until Liz delivers the real file). Wire real reads and writes for jobs, events, `log_event` and `undo_last`.
 - [ ] **2:40 — Daytona runner.** In `daytona_runner.py`, create one sandbox on startup and upload `parts.csv`, `pricing.json` and the `sandbox/` scripts. Add a `run(script, args_json)` helper that executes `python script.py '<json>'` and parses the JSON it prints.
 - [ ] **2:50 — Part matcher.** `sandbox/matcher.py` loads `parts.csv` and filters by category. Rules: capacitor µF within ±6% and voltage at or above the original; contactor amps at or above the original. Return the top 3 options with a `why` line each.
@@ -75,22 +80,27 @@ This person owns the fake data, the ElevenLabs agent and the Loom script.
   - "Scratch that" calls `undo_last`.
   - Off-topic questions get a one-line answer, then a nudge back to the job.
   - "Close out" or "wrap up" calls `generate_invoice` and reads the total aloud.
-- [ ] **2:55 — Tools and turn-taking.** Add the 4 webhook tools pointing at Deandre's ngrok URL, with `job_id` filled from the `{{job_id}}` dynamic variable. Tune turn-taking and interruptions so the agent handles being interrupted.
+- [ ] **2:55 — Tools and turn-taking.** Remove the starter `run_code` tool from the agent. Add the 4 webhook tools pointing at Deandre's ngrok URL, with `job_id` filled from the `{{job_id}}` dynamic variable. Tune turn-taking and interruptions so the agent handles being interrupted.
 - [ ] **3:15 — Merge.** Run the full demo script, fix the prompt, and own the Loom script.
 
-## Jake: Mobile frontend
+## Jake: Mobile web frontend (Next.js on Vercel)
 
-This person owns everything the judges see. Polish matters more than accuracy.
+This person owns everything the judges see. Polish matters more than accuracy. The frontend is a mobile-first website, not a native app.
 
-- [ ] **2:05 — Job list.** Build `index.html` with Tailwind via CDN, dark and mobile-first. Show "Hi, Mike" and job cards grouped into Today, Upcoming and Past. Use a hardcoded mock array until `/api/jobs` is live.
-- [ ] **2:30 — Job screen.** Build `job.html`:
+**Stack:** Next.js (this repo) · Tailwind · `@elevenlabs/react` v1 · deployed on Vercel · talks to Deandre's FastAPI through rewrites.
+
+Before you write code, read the guides in `node_modules/next/dist/docs/` (see `AGENTS.md`). This Next.js version has breaking changes.
+
+- [ ] **2:05 — Job list.** Build `src/app/page.tsx`, dark and mobile-first. Show "Hi, Mike" and job cards grouped into Today, Upcoming and Past. Use a hardcoded mock array until `/api/jobs` is live. Make a first Vercel deploy early so you have the HTTPS URL.
+- [ ] **2:25 — Rewrites.** In `next.config`, proxy `/api/jobs/*` and `/invoices/*` to `BACKEND_URL` (Deandre's ngrok URL). Add the header `ngrok-skip-browser-warning: 1`. Set `BACKEND_URL` in Vercel. Delete or disable `src/app/api/run-code` before you deploy, because it is public on Vercel.
+- [ ] **2:30 — Job screen.** Build `src/app/jobs/[id]/page.tsx`:
   - Header: customer, address, equipment, complaint.
   - Middle: a large mic button with a "VacMan is listening / speaking" state.
   - Below: a live timeline of event cards, with an icon and color per type.
-- [ ] **2:50 — Wire the voice.** Use the ElevenLabs client SDK (`@elevenlabs/client` via CDN ESM) and call `Conversation.startSession({agentId, dynamicVariables: {job_id, customer_name, equipment, complaint}})`. Drive the speaking/listening indicator from its mode callback.
+- [ ] **2:50 — Wire the voice.** Adapt `src/components/VoiceAgent.tsx` and the `useConversation` hook from `@elevenlabs/react`. Start the session with `dynamicVariables: {job_id, customer_name, equipment, complaint}`. Read the `.d.ts` files in `node_modules/@elevenlabs/react` for the exact API. Drive the speaking/listening indicator from the hook's mode. The agent's tools are webhooks to the backend, so you need no browser tool handlers.
 - [ ] **3:00 — Live timeline.** Poll `/api/jobs/{id}/events` every 2 seconds and animate new cards in. Substitute options render as a special card listing the 3 parts.
 - [ ] **3:10 — Invoice view.** When an invoice event appears, show a slide-up panel that loads `/invoices/{job_id}`, with "Send to customer" and "Print" buttons.
-- [ ] **3:15 — Merge.** Test on a real phone through the ngrok URL. Polish spacing, loading states and the empty timeline.
+- [ ] **3:15 — Merge.** Redeploy on Vercel with the final `BACKEND_URL`. Test on a real phone with the Vercel URL. Polish spacing, loading states and the empty timeline.
 
 ## Together: merge, demo, submit
 
