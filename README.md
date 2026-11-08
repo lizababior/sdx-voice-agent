@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SDx Voice Agent
 
-## Getting Started
+Starter for the SDxSDSU Voice Agent Hackathon (ElevenLabs + Daytona). The voice loop already works end to end, so we spend the afternoon on the idea.
 
-First, run the development server:
+**Schedule:** kickoff 12:00 (the prompt is revealed in the room) · demos from 4:30 · winners before 6.
+
+## Before kickoff (everyone)
+
+- [ ] Send your GitHub username so you can be added to this repo
+- [ ] Redeem the ElevenLabs credits (instructions were sent to your RSVP email)
+- [ ] Redeem the Daytona credits (same email)
+- [ ] Clone the repo, run `npm install`, then do the setup below
+- [ ] `npm run smoke` prints all `PASS`
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url> && cd sdx-voice-agent
+npm install
+cp .env.example .env.local      # fill in keys (see below)
+npm run agent:setup             # first run creates the agent and prints ELEVENLABS_AGENT_ID
+npm run smoke                   # checks keys, token minting and a Daytona sandbox run
+npm run dev                     # http://localhost:3000, click "Start talking"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Keys:** the agent lives in one ElevenLabs account, so the team shares **one** `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`. Send them by DM, never commit them. Each person can use their own `DAYTONA_API_KEY`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+Browser (src/components/VoiceAgent.tsx)
+  ├─ GET  /api/conversation-token  → ElevenLabs WebRTC token (API key stays on the server)
+  ├─ live voice session with the ElevenLabs agent (@elevenlabs/react)
+  └─ agent calls client tool run_code → POST /api/run-code → Daytona ephemeral sandbox → stdout back to the agent
+```
 
-## Learn More
+| File | What to change |
+|---|---|
+| `agent/config.ts` | System prompt, first message and tools. **Edit this first when the prompt drops**, then run `npm run agent:setup` |
+| `src/components/VoiceAgent.tsx` | UI and client-tool handlers (`useConversationClientTool`) |
+| `src/app/api/*` | Server routes. Add more tool backends here |
+| `src/lib/daytona.ts` | Daytona sandbox helper |
 
-To learn more about Next.js, take a look at the following resources:
+### Adding a tool
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Add it to `CLIENT_TOOLS` in `agent/config.ts` (name, description, parameters).
+2. Register a handler with the same name in `VoiceAgent.tsx` using `useConversationClientTool("name", async (params) => ...)`.
+3. Run `npm run agent:setup`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Client tools run in the browser, so they work on localhost without a public URL.
 
-## Deploy on Vercel
+## Demo tips
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The microphone needs `localhost` or HTTPS. To demo from another device, deploy: `npx vercel` and add the three env vars in the Vercel project.
+- Test on the venue Wi-Fi early. Have a backup laptop with `.env.local` ready.
+- Agent voice and LLM can be changed in the ElevenLabs dashboard (Agents → your agent). `agent:setup` only overwrites the prompt, first message and tools.
