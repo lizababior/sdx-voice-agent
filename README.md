@@ -23,7 +23,9 @@ npm run smoke                   # checks keys, token minting and a Daytona sandb
 npm run dev                     # http://localhost:3000, click "Start talking"
 ```
 
-**Keys:** the agent lives in one ElevenLabs account, so the team shares **one** `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`. Send them by DM, never commit them. Each person can use their own `DAYTONA_API_KEY`.
+**Keys:** everyone uses their **own** ElevenLabs and Daytona keys (from your redeemed credits). No keys are shared. `npm run agent:setup` creates your own copy of the agent from `agent/config.ts`, so all copies stay identical as long as changes go into that file (not the ElevenLabs dashboard). After pulling someone's change to `agent/config.ts`, run `npm run agent:setup` again.
+
+Leave `DAYTONA_API_URL` out of `.env.local`: the SDK rejects it from a project `.env` file, and the default (`https://app.daytona.io/api`) is correct.
 
 ## How it works
 

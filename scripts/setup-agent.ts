@@ -35,5 +35,5 @@ if (agentId) {
     name: AGENT_NAME,
     conversationConfig,
   });
-  console.log(`Created agent. Add this to .env.local and share it with the team:\n\nELEVENLABS_AGENT_ID=${newId}\n`);
+  console.log(`Created agent. Add this to your .env.local:\n\nELEVENLABS_AGENT_ID=${newId}\n`);
 }
