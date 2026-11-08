@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import type { Job } from "@/lib/types";
 import { MicDock, type MicState } from "./MicDock";
 
 /** Wrap the session screen with this. The mic dock inside it talks to the ElevenLabs agent. */
@@ -10,7 +9,13 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   return <ConversationProvider>{children}</ConversationProvider>;
 }
 
-export function VoiceDock({ job, note }: { job: Job; note?: string | null }) {
+export function VoiceDock({
+  dynamicVariables,
+  note,
+}: {
+  dynamicVariables: Record<string, string>;
+  note?: string | null;
+}) {
   const [error, setError] = useState<string | null>(null);
 
   const { status, mode, startSession, endSession, sendUserMessage } = useConversation({
@@ -37,12 +42,7 @@ export function VoiceDock({ job, note }: { job: Job; note?: string | null }) {
         conversationToken: data.token,
         connectionType: "webrtc",
         useWakeLock: true,
-        dynamicVariables: {
-          job_id: job.id,
-          customer_name: job.customer,
-          equipment: job.equipment ?? "",
-          complaint: job.complaint ?? "",
-        },
+        dynamicVariables,
       });
       navigator.vibrate?.(10);
     } catch (err) {

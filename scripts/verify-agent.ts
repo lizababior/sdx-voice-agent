@@ -1,6 +1,6 @@
 // Reads the agent settings back from ElevenLabs. Run with: npm run agent:verify
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { CLIENT_TOOLS, EXTRA_LANGUAGES, KNOWLEDGE_BASE, LLM, VOICE_ID } from "../agent/config.ts";
+import { ASR_KEYWORDS, CLIENT_TOOLS, EXTRA_LANGUAGES, KNOWLEDGE_BASE, LLM, VOICE_ID } from "../agent/config.ts";
 
 const client = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 const agentId = process.env.ELEVENLABS_AGENT_ID!;
@@ -30,6 +30,8 @@ check("run_code not attached", !attached.includes("run_code"));
 
 const kb = (prompt?.knowledgeBase ?? []).map((d) => d.name.replace(/ \[.*\]$/, "")).sort();
 check("knowledge base attached", kb.join(",") === KNOWLEDGE_BASE.map((d) => d.name).sort().join(","), kb.join(", "));
+
+check("speech-to-text keywords", ASR_KEYWORDS.every((k) => cc.asr?.keywords?.includes(k)), `${cc.asr?.keywords?.length ?? 0} keywords`);
 
 // Conversation behavior (greeting, tools, Spanish) is checked by `npm run agent:test`.
 process.exit(failed ? 1 : 0);

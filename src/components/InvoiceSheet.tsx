@@ -7,7 +7,8 @@ import type { Job, JobEvent } from "@/lib/types";
 export function InvoiceSheet({ job, invoice, onClose }: { job: Job; invoice: JobEvent; onClose: () => void }) {
   const [showFull, setShowFull] = useState(false);
   const [saved, setSaved] = useState(false);
-  const url = `/invoices/${job.id}`;
+  // v2: the invoice PDF from the Daytona sandbox, as a blob URL.
+  const url = invoice.invoice_url ?? `/invoices/${job.id}`;
 
   return (
     <div className="fixed inset-0 z-20 flex flex-col justify-end">
@@ -47,7 +48,7 @@ export function InvoiceSheet({ job, invoice, onClose }: { job: Job; invoice: Job
         <div className="flex flex-col gap-3">
           <a
             href={url}
-            download={`Invoice-${job.customer}-${job.id}.html`}
+            download={`Invoice-${job.customer}-${job.id}.pdf`}
             onClick={() => setSaved(true)}
             className="flex h-14 items-center justify-center rounded-button bg-accent text-lg font-semibold text-accent-ink active:opacity-80"
           >

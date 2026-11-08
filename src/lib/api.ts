@@ -1,7 +1,6 @@
 import { MOCK_JOBS, USE_MOCK } from "./mock";
 import type { Job, JobEvent, JobGroup } from "./types";
-
-const TECH_ID = "t1";
+import { workOrderJob } from "./workOrder";
 
 function withGroup(job: Job): Job & { group: JobGroup } {
   if (job.group) return job as Job & { group: JobGroup };
@@ -15,16 +14,14 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export async function getJobs(): Promise<(Job & { group: JobGroup })[]> {
-  const jobs = USE_MOCK ? MOCK_JOBS : await getJson<Job[]>(`/api/jobs?tech_id=${TECH_ID}`);
+  // v2: one hardcoded work order (data/work-order.json), no jobs backend.
+  const jobs = USE_MOCK ? MOCK_JOBS : [workOrderJob];
   return jobs.map(withGroup);
 }
 
 export async function getJob(id: string): Promise<Job | null> {
   if (USE_MOCK) return MOCK_JOBS.find((j) => j.id === id) ?? null;
-  const res = await fetch(`/api/jobs/${encodeURIComponent(id)}`);
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return withGroup((await res.json()) as Job);
+  return id === workOrderJob.id ? withGroup(workOrderJob) : null;
 }
 
 export async function getEvents(id: string): Promise<JobEvent[]> {
