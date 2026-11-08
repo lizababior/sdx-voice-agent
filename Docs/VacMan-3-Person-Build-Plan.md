@@ -92,14 +92,14 @@ This person owns everything the judges see. Polish matters more than accuracy. T
 Before you write code, read the guides in `node_modules/next/dist/docs/` (see `AGENTS.md`). This Next.js version has breaking changes.
 
 - [ ] **2:05 — Job list.** Build `src/app/page.tsx`, dark and mobile-first. Show "Hi, Mike" and job cards grouped into Today, Upcoming and Past. Use a hardcoded mock array until `/api/jobs` is live. Make a first Vercel deploy early so you have the HTTPS URL.
-- [ ] **2:25 — Rewrites.** In `next.config`, proxy `/api/jobs/*` and `/invoices/*` to `BACKEND_URL` (Deandre's ngrok URL). Add the header `ngrok-skip-browser-warning: 1`. Set `BACKEND_URL` in Vercel. Delete or disable `src/app/api/run-code` before you deploy, because it is public on Vercel.
+- [ ] **2:25 — Rewrites.** In `next.config`, proxy `/api/jobs/*` and `/invoices/*` to `BACKEND_URL` (Deandre's ngrok URL). Add the header `ngrok-skip-browser-warning: 1`. Set these in Vercel under Project Settings → Environment Variables: `BACKEND_URL`, `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`. The key and agent ID come from Liz's ElevenLabs account, because her agent is the one in the demo. `/api/conversation-token` needs both. `src/app/api/run-code` already returns 404 on Vercel, so you do not need to delete it.
 - [ ] **2:30 — Job screen.** Build `src/app/jobs/[id]/page.tsx`:
   - Header: customer, address, equipment, complaint.
   - Middle: a large mic button with a "VacMan is listening / speaking" state.
   - Below: a live timeline of event cards, with an icon and color per type.
 - [ ] **2:50 — Wire the voice.** Adapt `src/components/VoiceAgent.tsx` and the `useConversation` hook from `@elevenlabs/react`. Start the session with `dynamicVariables: {job_id, customer_name, equipment, complaint}`. Read the `.d.ts` files in `node_modules/@elevenlabs/react` for the exact API. Drive the speaking/listening indicator from the hook's mode. The agent's tools are webhooks to the backend, so you need no browser tool handlers.
 - [ ] **3:00 — Live timeline.** Poll `/api/jobs/{id}/events` every 2 seconds and animate new cards in. Substitute options render as a special card listing the 3 parts.
-- [ ] **3:10 — Invoice view.** When an invoice event appears, show a slide-up panel that loads `/invoices/{job_id}`, with "Send to customer" and "Print" buttons.
+- [ ] **3:10 — Invoice view.** When an invoice event appears, show a slide-up panel that loads `/invoices/{job_id}`, with "Download invoice" and "Print" buttons. Download saves the invoice HTML as a file, and the contractor emails or shares it.
 - [ ] **3:15 — Merge.** Redeploy on Vercel with the final `BACKEND_URL`. Test on a real phone with the Vercel URL. Polish spacing, loading states and the empty timeline.
 
 ## Together: merge, demo, submit
