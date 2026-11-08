@@ -15,6 +15,12 @@ export const LLM = (process.env.VACMAN_LLM ?? "claude-haiku-5-5") as ElevenLabs.
 // One multilingual voice for English and Spanish.
 export const VOICE_ID = "cjVigY5qzO86Huf0OWal";
 
+// Words that speech-to-text must hear correctly. The first voice test heard "section" for "suction".
+export const ASR_KEYWORDS = [
+  "suction", "superheat", "subcooling", "Schrader", "R-410A", "R-22", "psi", "psig",
+  "TXV", "capacitor", "contactor", "condenser", "evaporator", "Carrier", "VacMan",
+];
+
 export const LANGUAGE = "en";
 export const EXTRA_LANGUAGES = ["es"];
 
