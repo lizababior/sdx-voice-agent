@@ -28,7 +28,7 @@ export async function startSandbox() {
   await deleteOldSandboxes();
   // Setup takes ~3 s, but once in testing it hung. A hung sandbox is deleted and a fresh one tried once.
   for (let attempt = 1; ; attempt++) {
-    const sandbox = await daytona().create({ language: "python", ephemeral: true, autoStopInterval: 15, labels: LABELS });
+    const sandbox = await daytona().create({ language: "python", ephemeral: true, autoStopInterval: 240, labels: LABELS });
     try {
       await setUp(sandbox);
       cache().set(sandbox.id, sandbox);
