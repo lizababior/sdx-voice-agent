@@ -9,7 +9,10 @@
     "lint": "eslint",
     "agent:setup": "node --env-file=.env.local scripts/setup-agent.ts",
     "smoke": "node --env-file=.env.local scripts/smoke.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:data": "node scripts/check-data.ts",
+    "agent:verify": "node --env-file=.env.local scripts/verify-agent.ts",
+    "agent:test": "node --env-file=.env.local scripts/agent-tests.ts"
   },
   "dependencies": {
     "@daytonaio/sdk": "^0.230.0",

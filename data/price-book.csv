@@ -1,0 +1,33 @@
+item_code,name,price,unit
+DIAG-STD,Diagnostic fee,129.00,each
+DIAG-AH,After-hours surcharge,95.00,each
+LEAK-SRCH,Leak search (electronic and bubble test),249.00,each
+SCHR-CORE,Schrader core replacement (per port),89.00,each
+R410A-LB,R-410A refrigerant,95.00,lb
+R22-LB,R-22 refrigerant,165.00,lb
+CAP-DUAL,Dual run capacitor replacement,245.00,each
+CAP-SINGLE,Single run capacitor replacement,195.00,each
+CONT-1P,Contactor replacement (1-pole),225.00,each
+CONT-2P,Contactor replacement (2-pole),265.00,each
+HARD-START,Hard start kit install,265.00,each
+FAN-MTR-COND,Condenser fan motor replacement,595.00,each
+BLWR-MTR,Blower motor replacement (PSC),725.00,each
+PRES-SW-LP,Low-pressure switch replacement,285.00,each
+PRES-SW-HP,High-pressure switch replacement,285.00,each
+FILTER-DRIER,Liquid line filter drier replacement,245.00,each
+TXV,Thermostatic expansion valve replacement,895.00,each
+BRAZE-REPAIR,Brazed leak repair,395.00,each
+NITRO-TEST,Nitrogen pressure test,175.00,each
+EVAC,System evacuation (vacuum to 500 microns),225.00,each
+COIL-CLEAN-COND,Condenser coil cleaning,189.00,each
+COIL-CLEAN-EVAP,Evaporator coil cleaning,349.00,each
+DRAIN-CLEAR,Condensate drain clearing,149.00,each
+FLOAT-SW,Float switch install,165.00,each
+TSTAT-BASIC,Thermostat replacement (basic),225.00,each
+TSTAT-SMART,Thermostat replacement (smart),395.00,each
+FILTER-1IN,Air filter (1 inch),25.00,each
+FILTER-4IN,Air filter (4 inch media),75.00,each
+DISC-30A,Disconnect replacement (30 A),185.00,each
+WHIP,Electrical whip replacement,95.00,each
+SURGE-PROT,Surge protector install,225.00,each
+MAINT-TUNE,Maintenance tune-up,149.00,each

@@ -1,0 +1,12 @@
+{
+  "job_id": "JOB-1042",
+  "customer_name": "Linda Johnson",
+  "address": "5520 Montezuma Rd, San Diego, CA 92115",
+  "equipment": "Carrier 3-ton condenser",
+  "model": "Carrier 24ACC636A003",
+  "refrigerant": "R-410A",
+  "metering_device": "fixed orifice",
+  "complaint": "No cooling. Outdoor unit runs, but the air from the vents is warm. The control board is flashing a code.",
+  "last_visit": "2025-06-12: maintenance tune-up, system normal",
+  "technician": "Maria Lopez"
+}

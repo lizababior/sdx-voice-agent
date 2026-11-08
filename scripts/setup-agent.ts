@@ -1,7 +1,10 @@
 // Creates or updates the ElevenLabs agent from agent/config.ts.
-// Run with: npm run agent:setup
+// It sends the complete agent, so no dashboard setting survives. Run with: npm run agent:setup
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { AGENT_NAME, CLIENT_TOOLS, FIRST_MESSAGE, SYSTEM_PROMPT } from "../agent/config.ts";
+import {
+  AGENT_NAME, CLIENT_TOOLS, DYNAMIC_VARIABLES, EXTRA_LANGUAGES, FIRST_MESSAGE,
+  LANGUAGE, LLM, SYSTEM_PROMPT, VOICE_ID,
+} from "../agent/config.ts";
 
 const client = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 const agentId = process.env.ELEVENLABS_AGENT_ID;
@@ -23,8 +26,24 @@ for (const toolConfig of CLIENT_TOOLS) {
 const conversationConfig = {
   agent: {
     firstMessage: FIRST_MESSAGE,
-    prompt: { prompt: SYSTEM_PROMPT, toolIds },
+    language: LANGUAGE,
+    dynamicVariables: { dynamicVariablePlaceholders: DYNAMIC_VARIABLES },
+    prompt: {
+      prompt: SYSTEM_PROMPT,
+      llm: LLM,
+      toolIds,
+      builtInTools: {
+        languageDetection: {
+          name: "language_detection",
+          params: { systemToolType: "language_detection" as const },
+        },
+      },
+    },
   },
+  tts: { voiceId: VOICE_ID },
+  languagePresets: Object.fromEntries(
+    EXTRA_LANGUAGES.map((language) => [language, { overrides: { agent: { language } } }]),
+  ),
 };
 
 if (agentId) {
