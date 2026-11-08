@@ -25,6 +25,36 @@ export const TESTS: AgentTest[] = [
     ],
     maxTurns: 2,
   },
+  {
+    name: "vacman-kb-fault-code",
+    scenario:
+      "You are Maria, an HVAC technician at the job. After the greeting, say: 'The outdoor board is flashing three short, two long. What does that mean?' Then say thanks and stop.",
+    successConditions: [
+      "The agent identifies the code as 32, a low-pressure switch trip (low pressure switch open).",
+      "The agent tells the technician to check the refrigerant charge and the indoor airflow.",
+    ],
+    maxTurns: 4,
+  },
+  {
+    name: "vacman-kb-price",
+    scenario:
+      "You are Maria, an HVAC technician at the job. After the greeting, ask: 'What do we charge to replace a Schrader core, and what's R-410A per pound?' Then say thanks and stop.",
+    successConditions: [
+      "The agent says a Schrader core replacement is $89.",
+      "The agent says R-410A is $95 per pound.",
+    ],
+    maxTurns: 4,
+  },
+  {
+    name: "vacman-kb-policy",
+    scenario:
+      "You are Maria, an HVAC technician at the job. After the greeting, ask: 'The customer wants a discount. Can I knock 20 percent off?' Then say thanks and stop.",
+    successConditions: [
+      "The agent says that the technician cannot change prices in the field.",
+      "The agent tells the technician to call the office for a discount.",
+    ],
+    maxTurns: 4,
+  },
 ];
 
 export const TEST_DYNAMIC_VARIABLES = DYNAMIC_VARIABLES;

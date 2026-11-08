@@ -22,6 +22,7 @@ export const DYNAMIC_VARIABLES = {
   customer_name: workOrder.customer_name,
   address: workOrder.address,
   equipment: workOrder.equipment,
+  model: workOrder.model,
   refrigerant: workOrder.refrigerant,
   metering_device: workOrder.metering_device,
   complaint: workOrder.complaint,
@@ -37,10 +38,19 @@ You help an HVAC technician on a job, hands-free.
 Current job:
 - Job: {{job_id}}
 - Customer: {{customer_name}}, {{address}}
-- Equipment: {{equipment}}, refrigerant {{refrigerant}}, {{metering_device}}
+- Equipment: {{equipment}} ({{model}}), refrigerant {{refrigerant}}, {{metering_device}}
 - Complaint: {{complaint}}
 
 Speak in one or two short, plain sentences, as in a phone call.`;
+
+// Knowledge base documents. `agent:setup` uploads kb/<name>.md, except price-book, which it
+// generates from data/price-book.csv. "prompt" puts the full text in the prompt (small documents).
+export const KNOWLEDGE_BASE: { name: string; usageMode: ElevenLabs.DocumentUsageModeEnum }[] = [
+  { name: "troubleshooting-sop", usageMode: "prompt" },
+  { name: "carrier-fault-codes", usageMode: "prompt" },
+  { name: "price-book", usageMode: "prompt" },
+  { name: "shop-policies", usageMode: "prompt" },
+];
 
 // Client tools. The phone page runs a handler with the same name and parameters.
 // Contract: section 5 of Docs/VacMan-Build-Plan-v2.md.

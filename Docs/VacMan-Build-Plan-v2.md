@@ -51,8 +51,8 @@ Use these words in code, prompts and talk. One word has one meaning.
 | **Invoice** | The PDF that VacMan creates from the job notes and the price book. The finish line. |
 | **Price book** | The shop's flat-rate price list. Each task or part has one fixed price. |
 | **Saturation temperature** | The temperature at which a refrigerant boils at a given pressure. It comes from a pressure-temperature (PT) table. |
-| **Superheat** | Suction line temperature minus the saturation temperature at the suction pressure. High superheat means low charge (often a leak) or a restriction. Low superheat means overcharge or flooding. Used on **fixed orifice** systems. |
-| **Subcooling** | Saturation temperature at the liquid line pressure minus the liquid line temperature. Used on **TXV** systems. |
+| **Superheat** | Suction line temperature minus the saturation temperature at the suction pressure. High superheat means low charge (often a leak) or a restriction. Low superheat means overcharge or flooding. On a **TXV** system the target is 8–12°F. On a **fixed orifice** system the target comes from a chart. |
+| **Subcooling** | Saturation temperature at the liquid line pressure minus the liquid line temperature. The charging method on **TXV** systems. With superheat, it separates a low charge from a restriction. |
 | **Schrader core** | The valve core in a service port. A common leak point. |
 | **Warm sandbox** | The one Daytona sandbox for the job. It starts when the page opens and stays ready for all tool calls. |
 | **Client tool** | An agent tool that the phone page runs in the browser. |
@@ -65,11 +65,11 @@ Use these words in code, prompts and talk. One word has one meaning.
 
 The team builds and tests **one** scenario from start to finish. The knowledge base covers more faults, so the agent can answer off-script, but only this path gets polish.
 
-The Johnson job: a Carrier condenser, R-410A, fixed orifice. Complaint: no cooling.
+The Johnson job: a Carrier 24ANA (Infinity, two-stage) 3-ton condenser, R-410A, TXV. Complaint: no cooling.
 
 1. Maria opens the job. VacMan greets her with the work order: "You're at the Johnson job, Carrier 3-ton, no cooling. What are you seeing?"
-2. Maria: "The board is flashing [code]." VacMan answers from the Carrier fault-code sheet. Liz picks a real code from the sheet that points to a low-pressure or low-charge problem.
-3. Maria: "Suction is 105, suction line is 60, R-410A." VacMan says "running the numbers", writes Python, and runs it in Daytona. Saturation temperature at 105 psig is about 34°F, so superheat is about **26°F**. Target is about 10°F (from the shop procedure). VacMan: "Superheat is about 26, so it's likely undercharged. Per the shop guide, check the Schrader cores for leaks." A result chip appears on the phone.
+2. Maria: "The outdoor board is flashing three short, two long." VacMan answers from the Carrier 24ANA code table: code 32, low-pressure switch trip. Check the indoor airflow first, then the refrigerant charge.
+3. Maria: "Suction is 105, suction line is 60, R-410A." VacMan says "running the numbers", writes Python, and runs it in Daytona. Saturation temperature at 105 psig is about 34°F, so superheat is about **26°F**. Target on a TXV system is 8–12°F (from the shop procedure). VacMan: "Superheat is about 26, so it's likely undercharged. Per the shop guide, check the Schrader cores for leaks." A result chip appears on the phone.
 4. Maria, in Spanish: "Encontré la fuga en el Schrader, cambié el core, agregué dos libras." VacMan answers in Spanish. The job notes appear **in English**: leak found at the Schrader core, core replaced, 2 lb R-410A added.
 5. Maria: "Also swapped the capacitor… actually no, it tested fine." The capacitor note disappears.
 6. A judge asks something off-topic. VacMan answers in one line and returns to the job.
@@ -187,7 +187,7 @@ Agree on this first. Then each person builds alone until the merge at 3:15. To c
 
 ### Data formats
 
-- **`work-order.json`:** `{job_id, customer_name, address, equipment, model, refrigerant, metering_device, complaint, last_visit, technician}`.
+- **`work-order.json`:** `{job_id, customer_name, address, equipment, model, refrigerant, metering_device, complaint, last_visit, technician}`. The demo job is a Carrier 24ANA136A003 with a TXV.
 - **`price-book.csv`:** `item_code, name, price, unit`. `unit` is `each` or `lb`.
 - **`pt-tables.csv`:** `refrigerant, psig, sat_temp_f`. Rows for `R-410A` and `R-22`.
 
@@ -214,7 +214,7 @@ Agree on this first. Then each person builds alone until the merge at 3:15. To c
 
 ### Dynamic variables
 
-The phone page passes these from the work order when it starts the session: `job_id`, `customer_name`, `address`, `equipment`, `refrigerant`, `metering_device`, `complaint`.
+The phone page passes these from the work order when it starts the session: `job_id`, `customer_name`, `address`, `equipment`, `model`, `refrigerant`, `metering_device`, `complaint`.
 
 ### Sandbox helper
 
@@ -335,6 +335,9 @@ Read the reason before you change a decision.
 | One polished scenario, not general troubleshooting | Judges score what they see in 2 minutes. A general troubleshooter is hard to make reliable in 3 hours. |
 | The finish line is an invoice PDF, marked "Sent to office for review" | "Solves the problem" (×2) asks for a real action. A PDF is visible. The status is honest without email. |
 | Knowledge base: fictional shop documents plus the real Carrier fault-code sheet | Real codes make the answers credible. Shop documents make it "this shop's knowledge". |
+| Equipment: Carrier 24ANA (TXV), not a basic condenser | Basic Carrier condensers have no board codes. The 24ANA manual has code 32 (low-pressure switch trip: check charge and indoor airflow), which fits the scenario. High superheat on a TXV system still points to low charge, so the demo numbers stay the same. |
+| Knowledge base in the prompt, not retrieval | The 4 documents are about 3,500 tokens. Retrieval adds a lookup to each turn and can miss. If latency is red, change the usage mode to `auto`. |
+| The price book document is generated from the CSV | Prices have one source, so the agent and the invoice always agree. |
 | Daytona runs code that the agent writes | A sandbox earns its place when it runs code that nobody wrote in advance. Fixed pricing alone could run in a Next.js route, and judges would see a bolt-on. |
 | The invoice also runs in the same warm sandbox | The sandbox is already warm, and the invoice is real data work in Daytona. |
 | A saturation helper in the sandbox | The agent writes shorter code, so it makes fewer errors. |
@@ -371,4 +374,3 @@ Email, SMS or any other real message. Payments. More than one work order or a wo
 
 - The organizer's answer on the pre-kickoff scaffold.
 - The result of the LLM test.
-- The Carrier fault code for step 2 of the demo.
