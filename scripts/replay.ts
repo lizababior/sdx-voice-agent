@@ -1,6 +1,8 @@
 // Replays the demo's tool calls against a real Daytona sandbox. No mocks.
 // Run with: npm run replay   (Section 8 of Docs/VacMan-Build-Plan-v2.md)
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { createInvoice, runPython, startSandbox, type JobNote } from "../src/lib/sandbox.ts";
 
 let failed = false;
@@ -54,6 +56,9 @@ check("subtotal, tax and total", inv.subtotal === 657 && inv.tax === 50.92 && in
   `${inv.subtotal} + ${inv.tax} = ${inv.total}`);
 const pdf = Buffer.from(inv.pdfBase64, "base64");
 check("PDF is not empty", pdf.length > 1000 && pdf.subarray(0, 4).toString() === "%PDF", `${pdf.length} bytes`);
+const pdfPath = path.join(tmpdir(), "vacman-invoice.pdf");
+writeFileSync(pdfPath, pdf);
+console.log(`      PDF saved: open ${pdfPath}`);
 
 const hostAfter = (await runPython(sandboxId, host)).stdout.trim();
 check("same sandbox for all calls", hostBefore !== "" && hostBefore === hostAfter, hostBefore);
