@@ -13,7 +13,7 @@ export const AGENT_NAME = "VacMan";
 export const LLM = (process.env.VACMAN_LLM ?? "claude-haiku-5-5") as ElevenLabs.Llm;
 
 // Speech speed (ElevenLabs range 0.7 to 1.2). Experienced technicians want it fast.
-export const TTS_SPEED = 1.15;
+export const TTS_SPEED = 1.2;
 
 // One multilingual voice for English and Spanish.
 export const VOICE_ID = "cjVigY5qzO86Huf0OWal";

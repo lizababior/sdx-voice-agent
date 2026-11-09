@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { formatMoney } from "@/lib/format";
 import type { Invoice, WorkOrder } from "@/lib/vacman";
 
@@ -13,16 +12,7 @@ export function InvoiceSheet({
   invoice: Invoice;
   onClose: () => void;
 }) {
-  const frame = useRef<HTMLIFrameElement>(null);
   const fileName = `${invoice.invoiceNumber}.pdf`;
-
-  function print() {
-    try {
-      frame.current?.contentWindow?.print();
-    } catch {
-      window.open(invoice.pdfUrl, "_blank");
-    }
-  }
 
   return (
     <div className="fixed inset-0 z-20 flex flex-col justify-end">
@@ -68,7 +58,6 @@ export function InvoiceSheet({
         )}
 
         <iframe
-          ref={frame}
           title={`Invoice ${invoice.invoiceNumber} PDF`}
           src={invoice.pdfUrl}
           className="h-96 w-full rounded-card border border-line bg-white"
@@ -82,13 +71,6 @@ export function InvoiceSheet({
           >
             Download invoice
           </a>
-          <button
-            type="button"
-            onClick={print}
-            className="h-14 rounded-button border border-line text-lg font-semibold active:bg-surface-2"
-          >
-            Print
-          </button>
           <button type="button" onClick={onClose} className="h-14 text-lg text-text-dim active:text-text">
             Done
           </button>

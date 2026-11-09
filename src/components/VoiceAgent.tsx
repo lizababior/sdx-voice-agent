@@ -53,6 +53,8 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
   const sandboxId = useRef<string | null>(null);
   const counter = useRef(0);
   const lastUserAt = useRef(0);
+  // Hang-up after the invoice: "invoice" when it is made, "replied" once VacMan answers (the total).
+  const endAfterReply = useRef<"no" | "invoice" | "replied">("no");
 
   function pushFeed(item: FeedItem) {
     feedRef.current = [...feedRef.current, item];
@@ -95,6 +97,7 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
       // The user line arrives when the transcript is final. The next "speaking" ends the turn.
       if (r === "user") lastUserAt.current = Date.now();
       if (r === "agent") setWrapPending(false);
+      if (r === "agent" && endAfterReply.current === "invoice") endAfterReply.current = "replied";
     },
     onModeChange: ({ mode }) => {
       if (mode === "speaking" && lastUserAt.current) {
@@ -108,6 +111,23 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
       setWrapPending(false);
     },
   });
+
+  // After the invoice, hang up once VacMan finishes the total, so the mic is not open on the invoice.
+  useEffect(() => {
+    if (endAfterReply.current === "no") return;
+    if (endAfterReply.current === "replied" && mode === "listening") {
+      endAfterReply.current = "no";
+      endSession();
+      return;
+    }
+    // Fallback: hang up even if VacMan never answers.
+    const t = setTimeout(() => {
+      if (endAfterReply.current === "no") return;
+      endAfterReply.current = "no";
+      endSession();
+    }, 20000);
+    return () => clearTimeout(t);
+  }, [mode, endSession, invoice]);
 
   /** Runs a tool handler and sends start and end events to the console. */
   async function tracked(name: string, args: unknown, run: () => Promise<{ result: string; ok: boolean }>) {
@@ -181,6 +201,7 @@ function Session({ workOrder }: { workOrder: WorkOrder }) {
       const inv: Invoice = { ...data, unpricedNotes: data.unpricedNotes ?? [], pdfUrl: pdfBlobUrl(data.pdfBase64) };
       setInvoice(inv);
       setSheetOpen(true);
+      endAfterReply.current = "invoice";
       pushFeed({
         kind: "chip",
         id: `c${++counter.current}`,
