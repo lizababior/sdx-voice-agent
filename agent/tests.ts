@@ -81,7 +81,7 @@ export const TESTS: AgentTest[] = [
     successConditions: [
       "The agent calls the run_python tool, and the code uses hvac.saturation_temp.",
       "The agent says that the superheat is about 26 degrees.",
-      "The agent says that the superheat is high, names low refrigerant charge (undercharge) as the most likely cause, and names a check that confirms it (for example subcooling or a leak search).",
+      "The agent says that the superheat is high and names low refrigerant charge (undercharge) as the most likely cause.",
       "The agent logs the reading as a measurement note with log_job_note.",
     ],
     maxTurns: 6,

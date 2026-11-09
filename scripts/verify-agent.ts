@@ -1,6 +1,6 @@
 // Reads the agent settings back from ElevenLabs. Run with: npm run agent:verify
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { ASR_KEYWORDS, CLIENT_TOOLS, EXTRA_LANGUAGES, KNOWLEDGE_BASE, LLM, VOICE_ID } from "../agent/config.ts";
+import { ASR_KEYWORDS, CLIENT_TOOLS, TTS_SPEED, EXTRA_LANGUAGES, KNOWLEDGE_BASE, LLM, VOICE_ID } from "../agent/config.ts";
 
 const client = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 const agentId = process.env.ELEVENLABS_AGENT_ID!;
@@ -17,6 +17,7 @@ const prompt = cc.agent?.prompt;
 
 check("LLM", prompt?.llm === LLM, String(prompt?.llm));
 check("voice", cc.tts?.voiceId === VOICE_ID, String(cc.tts?.voiceId));
+check("speech speed", cc.tts?.speed === TTS_SPEED, String(cc.tts?.speed));
 check("language detection on", Boolean(prompt?.builtInTools?.languageDetection));
 const presets = Object.keys(cc.languagePresets ?? {});
 check("language presets", EXTRA_LANGUAGES.every((l) => presets.includes(l)), presets.join(", "));

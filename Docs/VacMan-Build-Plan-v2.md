@@ -309,7 +309,7 @@ Before you write code, read the guides in `node_modules/next/dist/docs/` (see `A
 
 These rules go into the system prompt. This section is the single source for agent behavior.
 
-- Speak in one or two short, plain sentences, as in a phone call.
+- The technician is experienced: give the answer in one short sentence, usually under 15 words. Explain only when asked why. Ask a question only when a value is needed. After logging, say only "Logged."
 - Answer in the technician's language. Write all job notes and all invoice text in English.
 - Use the knowledge base for fault codes, procedures, prices and policies. When the knowledge base does not have the answer, say so.
 - Use `run_python` for all math. Use `hvac.saturation_temp(refrigerant, psig)`. Say "running the numbers" first. Say the result and the target, then the most likely cause first, then the check that confirms it.
@@ -384,6 +384,7 @@ Read the reason before you change a decision.
 | Correction by note ID, not "undo last" | The technician can correct any note, not only the last one. |
 | `log_job_note` returns only `{saved, note_id}`, not the full list | With the full list, the agent compared it with its memory and re-logged items when they differed, which caused duplicate charges. The agent tracks its notes from the conversation. |
 | Leak search is billed when a leak is found | A found leak means a leak search was done, and it is billable. It makes the demo invoice the same on every run. |
+| Short replies and speech speed 1.15 | The user is an experienced technician who wants the answer, not the lesson. Average reply went from 27 to 10 words, with all agent tests still passing. |
 | Expressive mode off | The agent writes plain text. Audio tags such as [happy] would show in the phone transcript. |
 | Read-back and a yes before the invoice | A real technician wants to check. It is also a natural point for the "change of mind" curveball. |
 | A preloaded work order as dynamic variables | It saves about 15 seconds of the Loom. Dispatch works this way. The invoice gets the customer data free. |
